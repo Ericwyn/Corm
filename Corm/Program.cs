@@ -22,7 +22,7 @@ namespace Corm
             var studentTable = new CormTable<Student>(corm, "Student");
 
             /*
-            // find All 
+            // SELECT 
             var students = studentTable.Find().All().Commit();
             Console.WriteLine(students.Count);
             */
@@ -42,7 +42,7 @@ namespace Corm
             */
             
             /*
-            // 插入，可插入 list 或者 单条数据，插入数据带有事务性质
+            // 插入 INSERT，可插入 list 或者 单条数据，插入数据带有事务性质
             var insert1 = new Student
             {
                 studentAge = 1, 
@@ -54,12 +54,24 @@ namespace Corm
                 studentName = "inset2",
             };
             studentTable.Insert().Value(new List<Student>(){insert1,insert2}).Commit();
-            
-            
             studentTable.Insert().Value(insert1).Commit();
             */
-            
-            
+
+            // 更新 UPDATE，以 Where 作为过滤规则，以 Value 作为更新的值
+            // 以下命令生成的 SqlCommand 语句为
+            // UPDATE Student SET studentAge_=@studentAge_VALUE WHERE studentName_=@studentName_OLD ;
+            // 相当于 Sql 
+            // UPDATE Student SET studentAge_ = 20 WHERE studentName_ = 'testtest'
+            studentTable.Update().Where(new Student()
+            {
+                studentName = "testtest",
+            })
+            .Value(new Student()
+            {
+                studentAge = 20,
+            })
+            .Commit();
+
         }
     }
 }

@@ -43,7 +43,13 @@ namespace Corm
         {
             return new CormInsertMiddleSql<T>(this);
         }
-
+        
+        // Update 更新
+        public CormUpdateMiddleSql<T> Update()
+        {
+            return new CormUpdateMiddleSql<T>(this);
+        }
+        
         public SqlCommand SqlCommand(string sql)
         {
             return new SqlCommand(sql, this._corm._sqlConnection);

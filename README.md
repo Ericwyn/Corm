@@ -95,4 +95,16 @@ Insert 是一个事务操作，当插入失败时候，整个插入操作将会�
         };
         studentTable.Insert().Value(list).Commit();
         
- 
+### Update 操作
+
+Update 使用 Where() 方法设置需要 Update 的条件，使用 Value() 方法设置更新之后的值
+
+    studentTable.Update().Where(new Student()
+    {
+        studentName = "testtest",
+    })
+    .Value(new Student()
+    {
+        studentAge = 20,
+    })
+    .Commit();

@@ -15,7 +15,7 @@ namespace Corm
         private CormTable<T> _cormTable;
         private string sqlBuff;
         private string tableName;
-        // 缓存该类型的列明，避免经常反射
+        // 缓存该类型的列名，避免经常反射
         private List<string> columnNameTemp;
         
         
@@ -69,7 +69,7 @@ namespace Corm
         {
             sqlBuff = "SELECT " + attributes + " FROM " + this.tableName +" ";
             // 拼接 Where 语句
-            sqlBuff = sqlBuff + "\n" + getWhereQuery() + " ";
+            sqlBuff = sqlBuff + "\n" + GetWhereQuery(this.whereEntity) + " ";
             // TODO 拼接 TOP
             // 拼接 ";"
             sqlBuff += ";";
@@ -131,16 +131,16 @@ namespace Corm
             return resList;
         }
 
-        private string getWhereQuery()
+        private static string GetWhereQuery(T obj)
         {
-            if (this.whereEntity == null){
-               return "";
+            if (obj == null){
+                return "";
             }
             var resWhereQuery = "";
             var properties = typeof(T).GetProperties();
             foreach (var property in properties)
             {
-                var value = property.GetValue(this.whereEntity);
+                var value = property.GetValue(obj);
                 // 如果这个属性存在的话
                 if (value != null)
                 {
@@ -155,10 +155,7 @@ namespace Corm
                         }
                     }
                 }
-                
             }
-
-            // 去除最后的一个 “and ” 
             if (resWhereQuery.EndsWith("and"))
             {
                 resWhereQuery = "WHERE "+resWhereQuery.Substring(0, resWhereQuery.Length - 4);

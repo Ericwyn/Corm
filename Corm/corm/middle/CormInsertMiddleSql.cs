@@ -14,7 +14,7 @@ namespace Corm
         private CormTable<T> _cormTable;
         private string sqlBuff;
         private string tableName;
-        // 缓存该类型的列明，避免经常反射
+        // 缓存该类型的列名，避免经常反射
         private List<string> columnNameTemp;
 
         private T insertTemp;
@@ -123,6 +123,7 @@ namespace Corm
                             }
                             else
                             {
+                                // 当找不到值的时候就用 DBNull.value 代替，插入的时候将会插入 null
                                 param.Value = DBNull.Value;
                             }
                             sqlCommand.Parameters.Add(param);
@@ -139,15 +140,14 @@ namespace Corm
             {
                 if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
                 {
-                    throw new Exception();
+                    throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
                 }
                 transaction.Commit();
             }
             catch (Exception e)
             {
-                CormLog.ConsoleLog("插入错误，请查看异常信息，该插入事务将回滚");
                 transaction.Rollback();
-                throw;
+                throw new CormException(" INSERT 错误，请查看异常信息，该插入事务将回滚");
             }
 
             return resColSize;
