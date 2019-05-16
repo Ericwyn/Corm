@@ -6,9 +6,9 @@ namespace Corm.utils
     {
         public static void ConsoleLog(string logMsg)
         {
-            Console.WriteLine("[Corm Log Start] --------------------------- ");
+            Console.WriteLine("\n[Corm Log] -------------------------------");
             Console.WriteLine(logMsg);
-            Console.WriteLine("-------------------------------------------- ");
+            Console.WriteLine("-------------------------------------------- \n");
         }
     }
 }

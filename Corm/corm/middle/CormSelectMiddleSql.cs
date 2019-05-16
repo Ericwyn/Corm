@@ -140,6 +140,7 @@ namespace Corm
                 }
                 resList.Add(objTemp);
             }
+            reader.Close();
             return resList;
         }
 
