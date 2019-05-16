@@ -3,10 +3,7 @@ using System.Data;
 
 namespace Corm.attrs
 {
-    [AttributeUsage(AttributeTargets.Class |
-                    AttributeTargets.Constructor |
-                    AttributeTargets.Field |
-                    AttributeTargets.Method |
+    [AttributeUsage(AttributeTargets.Field |
                     AttributeTargets.Property,
         AllowMultiple = false)]
     public class CormColumn : System.Attribute

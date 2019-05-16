@@ -17,8 +17,8 @@
  
 
 # 特性 Attribute
-## `[CormColumn(Name, Length, SqlDbType)]`
- - 数据库的列
+ - `[CormColumn(Name, Length, SqlDbType)]`
+     - 标记数据库的列
 
 # 使用说明
 ## 快速开始
