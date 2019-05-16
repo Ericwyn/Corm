@@ -125,9 +125,16 @@ namespace Corm
                     if (objAttrs.Length > 0)
                     {
                         CormColumn attr = objAttrs[0] as CormColumn;
-                        if (reader[attr.Name] != null)
+                        try
                         {
-                            property.SetValue(objTemp, reader[attr.Name]);
+                            if (reader[attr.Name] != null)
+                            {
+                                property.SetValue(objTemp, reader[attr.Name]);
+                            }
+                        }
+                        catch (IndexOutOfRangeException e)
+                        {
+                            // 只查询特定字段的时候会触发此处异常
                         }
                     }
                 }

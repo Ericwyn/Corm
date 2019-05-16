@@ -46,18 +46,17 @@
 ### Select
  - Find All
     
-        var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
-        var studentTable = new CormTable<Student>(corm, "Student");
         List<Student> list = studentTable.Find().All().Commit();
  
  - 带 Where 的查询
         
-        var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
-        var studentTable = new CormTable<Student>(corm, "Student");
         // 使用一个对象存储 Where 条件
         var selectTemp = new Student();
-        selectTemp.studentAge = 10;
+        // 可使用多个条件来限定
+        // selectTemp.studentAge = 10;
         selectTemp.studentName = "aaa";
         List<Student> list = studentTable.Find().Where(selectTemp).Commit();
  
- 
+ - 设定查询的字段
+        
+        List<Student> list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
