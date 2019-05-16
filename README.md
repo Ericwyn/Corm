@@ -34,7 +34,7 @@
 
  - 需要使用可空类型，例如 int?、double?、bool? ，否则 Where 查询会有错误
 
-### 查询
+### 使用 Corm 完成数据库操作
 
     public static void Main(string[] args)
         {
@@ -43,7 +43,8 @@
             List<Student> studentTable.Find().All().Commit();
         }
 
-### Select
+## 具体说明
+### Select 查询操作
  - Find All
     
         List<Student> list = studentTable.Find().All().Commit();
@@ -57,6 +58,41 @@
         selectTemp.studentName = "aaa";
         List<Student> list = studentTable.Find().Where(selectTemp).Commit();
  
- - 设定查询的字段
+ - 设定需要查询的字段
         
         List<Student> list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
+
+### Insert 操作
+Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
+
+Insert 是一个事务操作，当插入失败时候，整个插入操作将会回滚
+
+
+ - Insert 一条数据
+        
+        var insert1 = new Student
+        {
+            studentAge = 1, 
+            studentName = "inset1",
+        };
+        studentTable.Insert().Value(insert1).Commit();
+ 
+ - Insert 多条数据
+        
+        var insert1 = new Student
+        {
+            studentAge = 1, 
+            studentName = "inset1",
+        };
+        var insert2 = new Student()
+        {
+            studentAge = 02,
+            studentName = "inset2",
+        };
+        var list = new List<Student>(){
+            insert1,
+            insert2,
+        };
+        studentTable.Insert().Value(list).Commit();
+        
+ 
