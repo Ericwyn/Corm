@@ -15,3 +15,7 @@
             - 排序
      - CormTable 完成对对象的封装等功能
  
+
+## 特性 Attribute
+### `[CormColumn(Name, Length, SqlDbType)]`
+ - 数据库的列
