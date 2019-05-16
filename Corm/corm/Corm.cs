@@ -4,6 +4,12 @@ using System.Data.SqlClient;
 
 namespace Corm
 {
+    /*
+     * CORM -- A Simple ORM Framework for C# and SqlServer
+     * Author : Ericwyn
+     * Github: https://github.com/Ericwyn/Corm
+     * CreateDate: 2019/05/16
+     */
     public class Corm
     {
         public SqlConnection _sqlConnection { get; }

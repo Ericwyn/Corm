@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Xml;
 using Corm.attrs;
@@ -39,6 +40,26 @@ namespace Corm
             var list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
             */
+            
+            /*
+            // 插入，可插入 list 或者 单条数据，插入数据带有事务性质
+            var insert1 = new Student
+            {
+                studentAge = 1, 
+                studentName = "inset1",
+            };
+            var insert2 = new Student()
+            {
+                studentAge = 02,
+                studentName = "inset2",
+            };
+            studentTable.Insert().Value(new List<Student>(){insert1,insert2}).Commit();
+            
+            
+            studentTable.Insert().Value(insert1).Commit();
+            */
+            
+            
         }
     }
 }
