@@ -19,12 +19,12 @@ namespace Corm.attrs
             set => name = value;
         }
 
-        private int length ;
+        private int _size ;
 
-        public int Length
+        public int Size
         {
-            get => length;
-            set => length = value;
+            get => _size;
+            set => _size = value;
         }
 
         private SqlDbType dbType;
