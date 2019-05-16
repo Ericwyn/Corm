@@ -42,6 +42,7 @@
     <Compile Include="corm\Corm.cs" />
     <Compile Include="corm\CormMiddleSql.cs" />
     <Compile Include="corm\CormTable.cs" />
+    <Compile Include="corm\utils\CormLog.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

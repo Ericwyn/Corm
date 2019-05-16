@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using Corm.attrs;
+using Corm.utils;
 
 namespace Corm
 {
@@ -70,27 +72,38 @@ namespace Corm
             
             // 拼接 ";"
             sqlBuff += ";";
-            // 放入值
-            var properties = typeof(T).GetProperties();
-            foreach (var property in properties)
+            var sqlCommend = new SqlCommand(sqlBuff, _cormTable._corm._sqlConnection);
+
+            if (sqlBuff.Contains("WHERE "))
             {
-                var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
-                if (objAttrs.Length > 0)
+                // 有 Where 的话就要放入值
+                var properties = typeof(T).GetProperties();
+                foreach (var property in properties)
                 {
-                    CormColumn attr = objAttrs[0] as CormColumn;
-                    if (attr != null)
+                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    if (objAttrs.Length > 0)
                     {
-                        
-//                        Console.WriteLine(attr.Name);
-//                        Console.WriteLine(attr.Length);
-//                        Console.WriteLine(attr.DbType.ToString());
+                        CormColumn attr = objAttrs[0] as CormColumn;
+                        if (attr != null)
+                        {
+                            
+                            if (sqlBuff.Contains("@"+attr.Name))
+                            {
+                                // 证明预编译语句里面有这个属性
+                                var value = property.GetValue(this.whereEntity);
+                                var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
+                                param.Value = value;
+                                sqlCommend.Parameters.Add(param);
+                            }
+                        }
                     }
                 }
             }
-            
-            
-//            this._cormTable._corm._sqlConnection.     
-            Console.WriteLine(sqlBuff);
+            CormLog.ConsoleLog(sqlCommend.CommandText);
+            var reader = sqlCommend.ExecuteReader();
+            while(reader.Read()) {         
+                CormLog.ConsoleLog(String.Format("{0}", reader[0]));
+            }
             return null;
         }
 
