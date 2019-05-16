@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using System.Xml;
 using Corm.attrs;
 
@@ -18,13 +19,10 @@ namespace Corm
         {
             var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
             var studentTable = new CormTable<Student>(corm, "Student");
-            // find all
-            // studentTable.Find().All().Commit();
-            // find where
-            var selectTemp = new Student();
-//            selectTemp.studentAge = 10;
-            selectTemp.studentName = "aaa";
-            var list = studentTable.Find().Where(selectTemp).Commit();
+            var st = new Student();
+            st.studentAge = 10;
+            var students = studentTable.Find().Where(st).Commit();
+            Console.WriteLine(students.Count);
         }
     }
 }

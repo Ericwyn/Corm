@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace Corm
 {
-    public class CormTable<T>
+    public class CormTable<T> where T : new()
     {
         public Corm _corm { get; }
         public string _tableName { get; }

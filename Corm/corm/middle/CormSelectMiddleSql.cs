@@ -7,8 +7,10 @@ using Corm.utils;
 
 namespace Corm
 {
-    // 用来保存查询语句的中间状态
-    public class CormSelectMiddleSql<T>
+    /*
+     * 用来保存查询语句的中间状态
+     */
+    public class CormSelectMiddleSql<T> where T : new()
     {
         private CormTable<T> _cormTable;
         private string sqlBuff;
@@ -17,11 +19,29 @@ namespace Corm
         private string tableName;
 //        private string whereTemp = "";
         private T whereEntity;
+        // 缓存该类型的列明，避免经常反射
+        private List<string> columnNameTemp = new List<string>();
         
         public CormSelectMiddleSql(CormTable<T> cormTable)
         {
             this._cormTable = cormTable;
             this.tableName = _cormTable._tableName;
+            // 初始化 columnNameTemp, 避免频繁反射获取
+            var properties = typeof(T).GetProperties();
+            foreach (var property in properties)
+            {
+                var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                if (objAttrs.Length > 0)
+                {
+                    CormColumn attr = objAttrs[0] as CormColumn;
+                    if (attr != null)
+                    {
+                        this.columnNameTemp.Add(attr.Name);
+                    }
+                }
+            }
+            
+            
         }
 
         // 查询全部
@@ -61,23 +81,17 @@ namespace Corm
         public List<T> Commit()
         {
             sqlBuff = "SELECT " + attributes + " FROM " + this.tableName +" ";
-            // 拼接 where
-//            if (!whereTemp.Equals(""))
-//            {
-//                sqlBuff = sqlBuff + "\n" + whereTemp +" ";
-//            }
+            // 拼接 Where 语句
             sqlBuff = sqlBuff + "\n" + getWhereQuery() + " ";
-
-            // TODO 拼接 limit
-            
+            // TODO 拼接 TOP
             // 拼接 ";"
             sqlBuff += ";";
             var sqlCommend = new SqlCommand(sqlBuff, _cormTable._corm._sqlConnection);
+            var properties = typeof(T).GetProperties();
 
             if (sqlBuff.Contains("WHERE "))
             {
                 // 有 Where 的话就要放入值
-                var properties = typeof(T).GetProperties();
                 foreach (var property in properties)
                 {
                     var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
@@ -101,10 +115,25 @@ namespace Corm
             }
             CormLog.ConsoleLog(sqlCommend.CommandText);
             var reader = sqlCommend.ExecuteReader();
-            while(reader.Read()) {         
-                CormLog.ConsoleLog(String.Format("{0}", reader[0]));
+            var resList = new List<T>();
+            
+            while(reader.Read()) {
+                var objTemp = new T();
+                foreach (var property in properties)
+                {
+                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    if (objAttrs.Length > 0)
+                    {
+                        CormColumn attr = objAttrs[0] as CormColumn;
+                        if (reader[attr.Name] != null)
+                        {
+                            property.SetValue(objTemp, reader[attr.Name]);
+                        }
+                    }
+                }
+                resList.Add(objTemp);
             }
-            return null;
+            return resList;
         }
 
         private string getWhereQuery()
