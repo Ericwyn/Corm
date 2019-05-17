@@ -105,3 +105,20 @@ Update 使用 Where() 方法设置需要 Update 的条件，使用 Value() 方�
         studentAge = 20,
     })
     .Commit();
+
+### Delete 操作
+
+Delete 操作可选择删除表中全部数据，或按照特定条件删除
+
+ - 删除全部数据
+ 
+        studentTable.Delete().All().Commit();
+ 
+ - 按照特定条件删除
+ 
+        // 删除所有 studentName 为 "testtest" , studentAge 为 20 的行
+        studentTable.Delete().Where(new Student()
+        {
+            studentName = "testtest", 
+            studentAge = 20, 
+        }).Commit();

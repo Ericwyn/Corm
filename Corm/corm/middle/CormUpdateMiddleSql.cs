@@ -115,7 +115,7 @@ namespace Corm
                 }
             }
             
-            Console.WriteLine(sqlBuff);            
+            CormLog.ConsoleLog(sqlBuff);            
             resUpdateSize = sqlCommand.ExecuteNonQuery();
             if (resUpdateSize < 0)
             {

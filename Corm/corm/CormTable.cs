@@ -49,6 +49,11 @@ namespace Corm
         {
             return new CormUpdateMiddleSql<T>(this);
         }
+
+        public CormDeleteMiddleSql<T> Delete()
+        {
+            return new CormDeleteMiddleSql<T>(this);
+        }
         
         public SqlCommand SqlCommand(string sql)
         {
