@@ -10,8 +10,8 @@ namespace CORM.attrs
 
         public string TableName
         {
-            get => tableName;
-            set => tableName = value;
+            get { return tableName; }
+            set { tableName = value; }
         }
     }
 }

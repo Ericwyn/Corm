@@ -12,24 +12,24 @@ namespace CORM.attrs
 
         public string Name
         {
-            get => name;
-            set => name = value;
+            get { return name; }
+            set { name = value; }
         }
 
         private int _size ;
 
         public int Size
         {
-            get => _size;
-            set => _size = value;
+            get { return _size; }
+            set { _size = value; }
         }
 
         private SqlDbType dbType;
 
         public SqlDbType DbType
         {
-            get => dbType;
-            set => dbType = value;
+            get { return dbType; }
+            set { dbType = value; }
         }
     }
 }
