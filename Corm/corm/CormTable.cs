@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Xml.Serialization;
 using CORM.attrs;
 using CORM.utils;
 
@@ -84,7 +82,8 @@ namespace CORM
         {
             return new CormUpdateMiddleSql<T>(this);
         }
-
+        
+        // Delete 删除操作
         public CormDeleteMiddleSql<T> Delete()
         {
             return new CormDeleteMiddleSql<T>(this);
@@ -93,6 +92,11 @@ namespace CORM
         public SqlCommand SqlCommand(string sql)
         {
             return new SqlCommand(sql, this._corm._sqlConnection);
+        }
+
+        public void SqlLog(string sql)
+        {
+            _corm.LogUtils.SqlPrint(sql);
         }
         
     }

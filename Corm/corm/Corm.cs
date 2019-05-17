@@ -1,6 +1,6 @@
 using System;
-using System.Data;
 using System.Data.SqlClient;
+using CORM.utils;
 
 namespace CORM
 {
@@ -14,28 +14,73 @@ namespace CORM
     {
         public SqlConnection _sqlConnection { get; }
         public string ConnectStr { get; }
+        public CormLogUtils LogUtils { get; }
 
-        public Corm(string connectionStr)
+        private Corm(string connectionStr, CormLogUtils logUtils)
         {
             this.ConnectStr = connectionStr;
             this._sqlConnection = new SqlConnection(this.ConnectStr);
             // 直接打开连接
             this._sqlConnection.Open();
+            this.LogUtils = logUtils;
         }
-        
-        // 底层的 sql 执行方法，返回DataSet
-        public DataSet queryForDateSet(string sqlStr)
-        {
-            SqlDataAdapter sqlDataAdapter1 = new SqlDataAdapter(sqlStr, _sqlConnection);//利用已创建好的sqlConnection1,创建数据适配器sqlDataAdapter1
-            DataSet dataSetRes = new DataSet();  //创建数据集对象
-            sqlDataAdapter1.Fill(dataSetRes);    //执行查询,查询的结果存放在数据集里
-            return dataSetRes;
-        }
+
         
         // 事务
         public SqlTransaction BeginTransaction()
         {
             return this._sqlConnection.BeginTransaction();
         }
+        
+        // ---------------------------------- Build 模式 --------------------------------------
+        public class CormBuilder
+        {
+            private class _defaultSqlPrintCB : CormSqlPrintCB
+            {
+                public void SqlPrint(string sql)
+                {
+                    Console.WriteLine("\n[Corm Log] -------------------------------");
+                    Console.WriteLine(sql);
+                    Console.WriteLine("-------------------------------------------- \n");
+                }
+            }
+        
+            private string _connectStr = "";
+            private CormSqlPrintCB _sqlPrintCb = new _defaultSqlPrintCB();
+//        private bool _allDebugLog = false;
+        
+            public CormBuilder(){}
+
+            public CormBuilder Server(string connectStr)
+            {
+                this._connectStr = connectStr;
+                return this;
+            }
+
+            public CormBuilder SqlPrint(CormSqlPrintCB cb)
+            {
+                this._sqlPrintCb = cb;
+                return this;
+            }
+
+//        public CormBuilder DebugLog(bool allDebugLog)
+//        {
+//            _allDebugLog = allDebugLog;
+//            return this;
+//        }
+
+            public Corm Build()
+            {
+                if (_connectStr == null || _connectStr.Trim() == "")
+                {
+                    throw new CormException("创建 Corm 对象时候，ConnectStr 错误");
+                    return null;
+                }
+                return new Corm(_connectStr, new CormLogUtils(this._sqlPrintCb));
+            }
+        }
+        
     }
+
+    
 }

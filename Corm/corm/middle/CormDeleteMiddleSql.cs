@@ -77,8 +77,7 @@ namespace CORM
                     throw new CormException("DELETE 时候 All() 和 Where() 不能同时使用");
                 }
             }
-            CormLog.ConsoleLog(sqlBuff);
-            
+            this._cormTable.SqlLog(sqlBuff);            
             var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
             var properties = typeof(T).GetProperties();
             if (sqlBuff.Contains("WHERE "))

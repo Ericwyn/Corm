@@ -3,7 +3,8 @@
 
 不支持自动维护数据库表结构，使用的时候，先设计好数据库，之后依据数据库的表结构创建 Entity 类
 
-具体使用文档可以查看 [中文文档](doc/Doc-zh.md)
+ - 文档： [中文文档](doc/Doc-zh.md)
+ - 代码示例： [CormTest-Program](Corm/Program.cs)
 
 # 原理
 
@@ -35,13 +36,13 @@
  - 支持事务
  - ~~启动时候对 Entity 结构进行判断~~
  - 自动解析SqlDataReader
- - ~~自定义 Sql 和日志打印的回调~~
+ - 自定义 Sql 和日志打印的回调
  - ~~初始化配置， Corm 单例模式~~
 
 # 快速开始
 
 
-    namespace Corm
+    namespace CormTest
     {
         /*
         * Entity 类
@@ -60,7 +61,10 @@
         {
             public static void Main(string[] args)
             {
-                var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
+                var corm = new Corm.CormBuilder()
+                    .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
+                    .SqlPrint(new CustomSqlPrintCb())
+                    .Build();
                 var studentTable = new CormTable<Student>(corm);
     
                 // SELECT * FROM Student

@@ -120,7 +120,7 @@ namespace CORM
                 }
             }
             
-            CormLog.ConsoleLog(sqlBuff);
+            this._cormTable.SqlLog(sqlBuff);
             if (transaction != null)
             {
                 sqlCommand.Transaction = transaction;

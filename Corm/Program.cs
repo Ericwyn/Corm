@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Xml;
 using CORM.utils;
 using CORM.attrs;
 
@@ -19,18 +16,31 @@ namespace CORM
     
     internal class Program
     {
+        /*
+         * 自定义一个回调类来完成 sql 打印
+         */
+        private class CustomSqlPrintCb : CormSqlPrintCB
+        {
+            public void SqlPrint(string sql)
+            {
+                sql = sql.Replace("\n", " ");
+                sql = sql.Replace("  ", " ");
+                Console.WriteLine(sql);
+            }
+        }
+        
         public static void Main(string[] args)
         {
-            var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
+            var corm = new Corm.CormBuilder()
+                .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
+                .SqlPrint(new CustomSqlPrintCb())
+                .Build();
             var studentTable = new CormTable<Student>(corm);
 
-            
-            /*
             // SELECT 查询全部数据
             var students = studentTable.Find().All().Commit();
             Console.WriteLine(students.Count);
-            */
-
+            
             /*
             // SELECT 按 where 条件查询
             var st = new Student();

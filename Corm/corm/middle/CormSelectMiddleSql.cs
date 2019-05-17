@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using CORM.attrs;
 using CORM.utils;
@@ -133,7 +132,7 @@ namespace CORM
                     }
                 }
             }
-            CormLog.ConsoleLog(sqlCommend.CommandText);
+            this._cormTable.SqlLog(sqlBuff);
             if (transaction != null)
             {
                 sqlCommend.Transaction = transaction;

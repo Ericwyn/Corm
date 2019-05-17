@@ -137,7 +137,7 @@ namespace CORM
                 }
             }
 
-            CormLog.ConsoleLog(sqlBuff);
+            this._cormTable.SqlLog(sqlBuff);
             int resColSize = -1;
             if (transaction != null)
             {

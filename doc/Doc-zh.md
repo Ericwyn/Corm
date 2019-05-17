@@ -31,12 +31,15 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
     public static void Main(string[] args)
         {
-            var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
+            var corm = new Corm.CormBuilder()
+                .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
+                .SqlPrint(new CustomSqlPrintCb())
+                .Build();
             var studentTable = new CormTable<Student>(corm);
             List<Student> studentTable.Find().All().Commit();
         }
 
- - Corm 创建的时候需要传入 SqlConnection String 
+ - Corm 由 Corm.CormBuilder类创建，需要传入 SqlConnection String，可以传入 SqlPrintCB 自定义 sql 打印 
  - CormTable 创建的时候可以手动设置对应的表的名字
  - 也可使用 `[CormTable(TableName="xxx")]` 来标记 Entity 类对应的表的名称，无需在创建时候传入
 
