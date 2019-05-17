@@ -59,6 +59,12 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
         
         List<Student> list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
 
+ - 只查询前 n 条，可使用 Top(n) 方法进行限定
+    
+    此处命名可能会有误解，**`All()` 方法指的字段的 All ，而此处的 Top n 指的是查询行数** 
+
+        List<Student> list = studentTable.Find().All().Top(1).Commit();
+        
  - 手写 Sql 语句进行查询
  
     Corm 支持传入手写的 Sql 语句进行查询，也会自动解析成 Entity 类的 List，并且也提供了事务的支持，可使用以下两个方法

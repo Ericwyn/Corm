@@ -25,6 +25,8 @@ namespace Corm
         private string attributes = "*";
         // 自定义的 Sql 查询语句
         private SqlCommand customizeSqlCommand;
+        // Top 数量
+        private int topNum = -1;
         
         public CormSelectMiddleSql(CormTable<T> cormTable)
         {
@@ -58,13 +60,13 @@ namespace Corm
             this.whereObj = set;
             return this;
         }
-
-        // TODO LIMIT ,SqlServer 的 LIMIT 语句也太反人类了吧！！！
-//        // Limit 
-//        public CormSelectMiddleSql<T> Limit(int start, int end)
-//        {
-//            
-//        }
+        
+        // Top 设置
+        public CormSelectMiddleSql<T> Top(int num)
+        {
+            this.topNum = num;
+            return this;
+        }
 
         public List<T> Commit()
         {
@@ -91,7 +93,14 @@ namespace Corm
                 resList = parseSqlDataReader(reader);
                 return resList;
             }
-            sqlBuff = "SELECT " + attributes + " FROM " + this.tableName +" ";
+            // 拼接 TOP 语句
+            var topQuery = "";
+            if (this.topNum >= 0)
+            {
+                topQuery = " TOP(" + topNum + ") ";
+            }
+            
+            sqlBuff = "SELECT " + topQuery + attributes + " FROM " + this.tableName +" ";
             // 拼接 Where 语句
             sqlBuff = sqlBuff + "\n" + GetWhereQuery(this.whereObj) + " ";
             // TODO 拼接 TOP

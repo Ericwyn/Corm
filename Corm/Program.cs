@@ -44,7 +44,14 @@ namespace Corm
             var list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
             */
-
+            
+            /*
+            // SELECT 只查询前 n 条
+            var list = studentTable.Find().All().Top(1).Commit();
+            Console.WriteLine(list);
+            */
+                        
+            /*
             // SELECT 自定义查询语句
             var list = studentTable.Find().Customize(
                 "SELECT * FROM Student WHERE studentName_=@studentName_",
@@ -54,6 +61,7 @@ namespace Corm
                 }
             ).Commit();
             Console.WriteLine(list);
+            */
 
             /*
             // INSERT 插入，可插入 list 或者 单条数据，插入数据带有事务性质
