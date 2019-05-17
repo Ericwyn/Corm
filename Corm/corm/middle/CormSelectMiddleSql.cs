@@ -63,9 +63,13 @@ namespace Corm
 //        {
 //            
 //        }
-        
-        
+
         public List<T> Commit()
+        {
+            return Commit(null);
+        }
+        
+        public List<T> Commit(SqlTransaction transaction)
         {
             sqlBuff = "SELECT " + attributes + " FROM " + this.tableName +" ";
             // 拼接 Where 语句
@@ -101,6 +105,10 @@ namespace Corm
                 }
             }
             CormLog.ConsoleLog(sqlCommend.CommandText);
+            if (transaction != null)
+            {
+                sqlCommend.Transaction = transaction;
+            }
             var reader = sqlCommend.ExecuteReader();
             var resList = new List<T>();
             

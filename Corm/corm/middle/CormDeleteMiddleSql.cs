@@ -34,11 +34,16 @@ namespace Corm
             deleteAllFlag = true;
             return this;
         }
+
+        public int Commit()
+        {
+            return Commit(null);
+        }
         
         /*
          * DELETE FROM [dbo].[Product]
          */
-        public int Commit()
+        public int Commit(SqlTransaction transaction)
         {
             int resDeleteSize = -1;
             sqlBuff += "DELETE FROM " + this.tableName + " ";
@@ -98,6 +103,11 @@ namespace Corm
                         }
                     }
                 }
+            }
+
+            if (transaction != null)
+            {
+                sqlCommand.Transaction = transaction;
             }
             resDeleteSize = sqlCommand.ExecuteNonQuery();
             if (resDeleteSize < 0)

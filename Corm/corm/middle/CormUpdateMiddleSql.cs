@@ -44,8 +44,13 @@ namespace Corm
             this.updateObj = obj;
             return this;
         }
-        
+
         public int Commit()
+        {
+            return Commit(null);
+        }
+        
+        public int Commit(SqlTransaction transaction)
         {
             int resUpdateSize = -1;
             if (updateObj == null || whereObj == null)
@@ -115,7 +120,11 @@ namespace Corm
                 }
             }
             
-            CormLog.ConsoleLog(sqlBuff);            
+            CormLog.ConsoleLog(sqlBuff);
+            if (transaction != null)
+            {
+                sqlCommand.Transaction = transaction;
+            }
             resUpdateSize = sqlCommand.ExecuteNonQuery();
             if (resUpdateSize < 0)
             {

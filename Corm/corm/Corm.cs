@@ -32,6 +32,10 @@ namespace Corm
             return dataSetRes;
         }
         
-        // 
+        // 事务
+        public SqlTransaction BeginTransaction()
+        {
+            return this._sqlConnection.BeginTransaction();
+        }
     }
 }

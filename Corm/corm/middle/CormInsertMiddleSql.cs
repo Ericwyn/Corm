@@ -40,6 +40,11 @@ namespace Corm
             this.insertTempList = entityList;
             return this;
         }
+
+        public int Commit()
+        {
+            return Commit(null);
+        }
         
         /*
          * 带有事务属性的提交操作
@@ -49,7 +54,7 @@ namespace Corm
          * TODO 分成多次执行，例如当一次性插入数量超过 1000 的时候，分成多个批次，每个批次 1000 行
          * 
          */
-        public int Commit()
+        public int Commit(SqlTransaction transaction)
         {
             // 通过这个 Flag 来标记插入多行数据时候，每一行不同的占位符
             // 占位符规则为 "@" + columnName + flag + itemIndex
@@ -94,7 +99,7 @@ namespace Corm
 
             
             // 开始执行事务
-            var transaction = _cormTable._corm._sqlConnection.BeginTransaction();
+//            var transaction = _cormTable._corm._sqlConnection.BeginTransaction();
             var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
 
             T insertObj;
@@ -131,25 +136,19 @@ namespace Corm
                     }
                 }
             }
-            
+
             CormLog.ConsoleLog(sqlBuff);
             int resColSize = -1;
-            // 事务操作
-            sqlCommand.Transaction = transaction;
-            try
+            if (transaction != null)
             {
-                if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
-                {
-                    throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
-                }
-                transaction.Commit();
-            }
-            catch (Exception e)
-            {
-                transaction.Rollback();
-                throw new CormException(" INSERT 错误，请查看异常信息，该插入事务将回滚");
+                // 事务操作
+                sqlCommand.Transaction = transaction;
             }
 
+            if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
+            {
+                throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
+            }
             return resColSize;
         }
     }

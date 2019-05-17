@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Xml;
 using Corm.attrs;
+using Corm.utils;
 
 namespace Corm
 {
@@ -86,7 +87,33 @@ namespace Corm
                 studentAge = 20, 
             }).Commit();
             */
+
             
+            /*
+            // 事务操作示例
+            using (var transaction = corm.BeginTransaction())
+            {
+                try
+                {
+                    studentTable.Insert()
+                        .Value(new Student() {studentName = "trans1"})
+                        .Commit(transaction);
+                    var list = studentTable.Find()
+                        .Where(new Student() {studentName = "oldName"})
+                        .Commit(transaction);
+                    studentTable.Update()
+                        .Where(new Student() {studentName = list[0].studentName})
+                        .Value(new Student() {studentName = "newName"})
+                        .Commit(transaction);
+                    transaction.Commit();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("发生异常：" + e.Message + " ，插入失败，事务回滚");
+                    transaction.Rollback();
+                }
+            }
+            */
         }
     }
 }
