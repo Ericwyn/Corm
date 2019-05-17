@@ -37,3 +37,35 @@
  - ~~自动解析 DateSet、SqlDataReader~~
  - ~~自定义 Sql 和日志打印的回调~~
  - ~~初始化配置， Corm 单例模式~~
+
+# 快速开始
+
+
+    namespace Corm
+    {
+        /*
+        * Entity 类
+        */
+        [CormTable(TableName = "Student")]
+        public class Student
+        {
+            [CormColumn(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
+            public string studentName { get; set; }
+            
+            [CormColumn(Name = "studentAge_", Size = 2, DbType = SqlDbType.Int)]
+            public int? studentAge { get; set; }
+        }
+        
+        internal class Program
+        {
+            public static void Main(string[] args)
+            {
+                var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
+                var studentTable = new CormTable<Student>(corm);
+    
+                // SELECT * FROM Student
+                var students = studentTable.Find().All().Commit();
+                Console.WriteLine(students.Count);
+            }
+        }
+    }

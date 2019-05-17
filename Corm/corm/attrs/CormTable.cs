@@ -6,6 +6,12 @@ namespace Corm.attrs
             AllowMultiple = false)]
     public class CormTable : System.Attribute
     {
-        
+        private string tableName;
+
+        public string TableName
+        {
+            get => tableName;
+            set => tableName = value;
+        }
     }
 }

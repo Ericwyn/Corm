@@ -6,6 +6,7 @@ using Corm.attrs;
 
 namespace Corm
 {
+    [CormTable(TableName = "Student")]
     public class Student
     {
         [CormColumn(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
@@ -19,13 +20,13 @@ namespace Corm
         public static void Main(string[] args)
         {
             var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
-            var studentTable = new CormTable<Student>(corm, "Student");
+            var studentTable = new CormTable<Student>(corm);
 
-            /*
+            
             // SELECT 
             var students = studentTable.Find().All().Commit();
             Console.WriteLine(students.Count);
-            */
+            
 
             /*
             // 按 where 条件查询
@@ -73,7 +74,8 @@ namespace Corm
             })
             .Commit();
             */
-
+            
+            /*
             // Delete 删除操作
             // 删除该表全部数据
             studentTable.Delete().All().Commit();
@@ -83,7 +85,8 @@ namespace Corm
                 studentName = "testtest", 
                 studentAge = 20, 
             }).Commit();
-
+            */
+            
         }
     }
 }

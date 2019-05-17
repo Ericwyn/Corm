@@ -9,13 +9,14 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 # Attribute
  - `[CormColumn(Name, Length, SqlDbType)]`
      - 在 Entity 类的属性当中标记数据库的列
- - ~~`[CormTable(Name)]`~~
-	 - ~~在 Entity 类中标记数据库的名称~~
+ - `[CormTable(TableName)]`
+	 - 在 Entity 类上标记数据库的名称
 
 # 使用说明
 ## 快速开始
 ### Entity 类创建
-
+    
+    [CormTable(TableName = "Student")]
     public class Student
     {
         [CormColumn(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
@@ -31,12 +32,13 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
     public static void Main(string[] args)
         {
             var corm = new Corm("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount");
-            var studentTable = new CormTable<Student>(corm, "Student");
+            var studentTable = new CormTable<Student>(corm);
             List<Student> studentTable.Find().All().Commit();
         }
 
  - Corm 创建的时候需要传入 SqlConnection String 
- - CormTable 创建的时候需要传入 corm 和对应的表的名字（后续会使用 [CormTable()] Attribute 来标记，无需在创建时候传入 ） 
+ - CormTable 创建的时候可以手动设置对应的表的名字
+ - 也可使用 `[CormTable(TableName="xxx")]` 来标记 Entity 类对应的表的名称，无需在创建时候传入
 
 ## 具体说明
 ### Select 查询操作
