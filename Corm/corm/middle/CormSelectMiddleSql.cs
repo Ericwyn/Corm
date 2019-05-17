@@ -20,9 +20,11 @@ namespace Corm
         
         
         //private string whereTemp = "";
-        private T whereEntity;
+        private T whereObj;
         // 查找的属性
         private string attributes = "*";
+        // 自定义的 Sql 查询语句
+        private SqlCommand customizeSqlCommand;
         
         public CormSelectMiddleSql(CormTable<T> cormTable)
         {
@@ -53,7 +55,7 @@ namespace Corm
         // Where 查询
         public CormSelectMiddleSql<T> Where(T set)
         {
-            this.whereEntity = set;
+            this.whereObj = set;
             return this;
         }
 
@@ -71,9 +73,27 @@ namespace Corm
         
         public List<T> Commit(SqlTransaction transaction)
         {
+            if (customizeSqlCommand != null && 
+                (!attributes.Equals("*") || whereObj != null))
+            {
+                throw new CormException("SELECT 错误，Customize() 方法与其他查询方法冲突，请检查");
+            }
+
+            SqlDataReader reader;
+            List<T> resList;
+            if (customizeSqlCommand != null)
+            {
+                if (transaction != null)
+                {
+                    customizeSqlCommand.Transaction = transaction;
+                }
+                reader = customizeSqlCommand.ExecuteReader();
+                resList = parseSqlDataReader(reader);
+                return resList;
+            }
             sqlBuff = "SELECT " + attributes + " FROM " + this.tableName +" ";
             // 拼接 Where 语句
-            sqlBuff = sqlBuff + "\n" + GetWhereQuery(this.whereEntity) + " ";
+            sqlBuff = sqlBuff + "\n" + GetWhereQuery(this.whereObj) + " ";
             // TODO 拼接 TOP
             // 拼接 ";"
             sqlBuff += ";";
@@ -95,7 +115,7 @@ namespace Corm
                             if (sqlBuff.Contains("@"+attr.Name))
                             {
                                 // 证明预编译语句里面有这个属性
-                                var value = property.GetValue(this.whereEntity);
+                                var value = property.GetValue(this.whereObj);
                                 var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
                                 param.Value = value;
                                 sqlCommend.Parameters.Add(param);
@@ -109,12 +129,47 @@ namespace Corm
             {
                 sqlCommend.Transaction = transaction;
             }
-            var reader = sqlCommend.ExecuteReader();
+            reader = sqlCommend.ExecuteReader();
+            resList = parseSqlDataReader(reader);
+            return resList;
+        }
+
+        // 使用自定义的 Sql 语句进行查询
+        public CormSelectMiddleSql<T> Customize(string sqlStr)
+        {
+            return Customize(sqlStr, null);
+        }
+
+        public CormSelectMiddleSql<T> Customize(string sqlStr, SqlParameter[] parameters)
+        {
+            if (sqlStr == null || sqlStr.Trim().Equals(""))
+            {
+                throw new Exception("SELECT 使用 Customize() 方法进行自定义查询的时候，传入的 Sql 语句有误");
+            }
+            
+            this.customizeSqlCommand = new SqlCommand(sqlStr, this._cormTable._corm._sqlConnection);
+            if (parameters != null && parameters.Length != 0)
+            {
+                foreach (var parameter in parameters)
+                {
+                    customizeSqlCommand.Parameters.Add(parameter);
+                }
+            }
+
+            return this;
+        }
+        
+        
+        /*
+         * 解析 SqlDataReader
+         */
+        private List<T> parseSqlDataReader(SqlDataReader reader)
+        {
             var resList = new List<T>();
             
             while(reader.Read()) {
                 var objTemp = new T();
-                foreach (var property in properties)
+                foreach (var property in typeof(T).GetProperties())
                 {
                     var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
                     if (objAttrs.Length > 0)
@@ -145,7 +200,7 @@ namespace Corm
             reader.Close();
             return resList;
         }
-
+        
         private static string GetWhereQuery(T obj)
         {
             if (obj == null){

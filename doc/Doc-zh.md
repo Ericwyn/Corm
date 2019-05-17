@@ -59,6 +59,27 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
         
         List<Student> list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
 
+ - 手写 Sql 语句进行查询
+ 
+    Corm 支持传入手写的 Sql 语句进行查询，也会自动解析成 Entity 类的 List，并且也提供了事务的支持，可使用以下两个方法
+        
+    - `Customize(string sqlStr)`
+        - 可传入拼接的 Sql
+    - `Customize(string sqlStr, SqlParameter[] parameters)`
+        - 传入预编译语句以及需要替换的参数
+    
+    示例代码如下
+    
+        // SELECT 自定义查询语句
+        var list = studentTable.Find().Customize(
+            "SELECT * FROM Student WHERE studentName_=@studentName_",
+            new SqlParameter[]
+            {
+                new SqlParameter("@studentName_", "test3"),
+            }
+        ).Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
+        Console.WriteLine(list);
+
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
 

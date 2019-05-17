@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Xml;
 using Corm.attrs;
 using Corm.utils;
@@ -24,25 +25,36 @@ namespace Corm
             var studentTable = new CormTable<Student>(corm);
 
             
-            // SELECT 
+            /*
+            // SELECT 查询全部数据
             var students = studentTable.Find().All().Commit();
             Console.WriteLine(students.Count);
-            
+            */
 
             /*
-            // 按 where 条件查询
+            // SELECT 按 where 条件查询
             var st = new Student();
             st.studentAge = 10;
             var students = studentTable.Find().Where(st).Commit();
             Console.WriteLine(students.Count);
             */
-            
+
             /*
-            // 查询特定的属性
+            // SELECT 查询特定的属性
             var list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
             */
-            
+
+            // SELECT 自定义查询语句
+            var list = studentTable.Find().Customize(
+                "SELECT * FROM Student WHERE studentName_=@studentName_",
+                new SqlParameter[]
+                {
+                    new SqlParameter("@studentName_", "test3"),
+                }
+            ).Commit();
+            Console.WriteLine(list);
+
             /*
             // INSERT 插入，可插入 list 或者 单条数据，插入数据带有事务性质
             var insert1 = new Student
@@ -75,7 +87,7 @@ namespace Corm
             })
             .Commit();
             */
-            
+
             /*
             // Delete 删除操作
             // 删除该表全部数据
@@ -88,7 +100,6 @@ namespace Corm
             }).Commit();
             */
 
-            
             /*
             // 事务操作示例
             using (var transaction = corm.BeginTransaction())
