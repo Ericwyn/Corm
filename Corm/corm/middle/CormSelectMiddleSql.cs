@@ -116,7 +116,14 @@ namespace Corm
                         {
                             if (reader[attr.Name] != null)
                             {
-                                property.SetValue(objTemp, reader[attr.Name]);
+                                if (reader[attr.Name] is DBNull)
+                                {
+                                    property.SetValue(objTemp, null);
+                                }
+                                else
+                                {
+                                    property.SetValue(objTemp, reader[attr.Name]);
+                                }
                             }
                         }
                         catch (IndexOutOfRangeException e)
