@@ -34,7 +34,7 @@
 	 - 按特定条件删除
  - 支持事务
  - ~~启动时候对 Entity 结构进行判断~~
- - ~~自动解析 DateSet、SqlDataReader~~
+ - 自动解析SqlDataReader
  - ~~自定义 Sql 和日志打印的回调~~
  - ~~初始化配置， Corm 单例模式~~
 
