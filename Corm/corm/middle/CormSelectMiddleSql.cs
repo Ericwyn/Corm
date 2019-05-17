@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using Corm.attrs;
-using Corm.utils;
+using CORM.attrs;
+using CORM.utils;
 
-namespace Corm
+namespace CORM
 {
     /*
      * 用来保存查询语句的中间状态

@@ -1,7 +1,7 @@
 using System;
 using System.Data;
 
-namespace Corm.attrs
+namespace CORM.attrs
 {
     [AttributeUsage(AttributeTargets.Field |
                     AttributeTargets.Property,

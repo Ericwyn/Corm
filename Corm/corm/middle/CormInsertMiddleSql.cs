@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using Corm.attrs;
-using Corm.utils;
+using CORM.attrs;
+using CORM.utils;
 
-namespace Corm
+namespace CORM
 {
     /**
      * 用来存储 Insert 语句的中间状态

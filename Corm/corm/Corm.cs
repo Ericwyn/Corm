@@ -2,7 +2,7 @@ using System;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace Corm
+namespace CORM
 {
     /*
      * CORM -- A Simple ORM Framework for C# and SqlServer

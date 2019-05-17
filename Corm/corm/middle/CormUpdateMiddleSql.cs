@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using Corm.attrs;
-using Corm.utils;
+using CORM.attrs;
+using CORM.utils;
 
-namespace Corm
+namespace CORM
 {
     /*
      * 用来保存 Update 中间状态的 sql

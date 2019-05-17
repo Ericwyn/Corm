@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Xml;
-using Corm.attrs;
-using Corm.utils;
+using CORM.utils;
+using CORM.attrs;
 
-namespace Corm
+namespace CORM
 {
     [CormTable(TableName = "Student")]
     public class Student

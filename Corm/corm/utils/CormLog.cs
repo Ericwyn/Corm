@@ -1,6 +1,6 @@
 using System;
 
-namespace Corm.utils
+namespace CORM.utils
 {
     public class CormLog
     {

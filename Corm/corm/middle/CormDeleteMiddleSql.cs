@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using Corm.attrs;
-using Corm.utils;
+using CORM.attrs;
+using CORM.utils;
 
-namespace Corm
+namespace CORM
 {
     public class CormDeleteMiddleSql<T> where T : new()
     {

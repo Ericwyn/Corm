@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Xml.Serialization;
-using Corm.attrs;
-using Corm.utils;
+using CORM.attrs;
+using CORM.utils;
 
-namespace Corm
+namespace CORM
 {
     public class CormTable<T> where T : new()
     {

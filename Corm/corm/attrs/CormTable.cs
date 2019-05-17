@@ -1,6 +1,6 @@
 using System;
 
-namespace Corm.attrs
+namespace CORM.attrs
 {
     [AttributeUsage(AttributeTargets.Class ,
             AllowMultiple = false)]
