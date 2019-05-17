@@ -47,13 +47,13 @@
         /*
         * Entity 类
         */
-        [CormTable(TableName = "Student")]
+        [Table(TableName = "Student")]
         public class Student
         {
-            [CormColumn(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
+            [Column(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
             public string studentName { get; set; }
             
-            [CormColumn(Name = "studentAge_", Size = 2, DbType = SqlDbType.Int)]
+            [Column(Name = "studentAge_", Size = 2, DbType = SqlDbType.Int)]
             public int? studentAge { get; set; }
         }
         

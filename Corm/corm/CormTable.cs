@@ -17,10 +17,10 @@ namespace CORM
             this._corm = corm;
             var properties = typeof(T).GetProperties();
             // 自动分析 TableName
-            var tableAttributes = typeof(T).GetCustomAttributes(typeof(CormTable), true);
+            var tableAttributes = typeof(T).GetCustomAttributes(typeof(Table), true);
             if (tableAttributes.Length > 0)
             {
-                CormTable tableAttr = tableAttributes[0] as CormTable;
+                Table tableAttr = tableAttributes[0] as Table;
                 if (tableAttr != null && tableAttr.TableName != null && !tableAttr.TableName.Trim().Equals(""))
                 {
                     this._tableName = tableAttr.TableName;
@@ -34,10 +34,10 @@ namespace CORM
             }
             foreach (var property in properties)
             {
-                var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                 if (objAttrs.Length > 0)
                 {
-                    CormColumn attr = objAttrs[0] as CormColumn;
+                    Column attr = objAttrs[0] as Column;
                     if (attr != null)
                     {
                         this.columnNameTemp.Add(attr.Name);
@@ -53,10 +53,10 @@ namespace CORM
             var properties = typeof(T).GetProperties();
             foreach (var property in properties)
             {
-                var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                 if (objAttrs.Length > 0)
                 {
-                    CormColumn attr = objAttrs[0] as CormColumn;
+                    Column attr = objAttrs[0] as Column;
                     if (attr != null)
                     {
                         this.columnNameTemp.Add(attr.Name);

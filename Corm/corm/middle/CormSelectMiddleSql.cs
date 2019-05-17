@@ -113,10 +113,10 @@ namespace CORM
                 // 有 Where 的话就要放入值
                 foreach (var property in properties)
                 {
-                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
-                        CormColumn attr = objAttrs[0] as CormColumn;
+                        Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
                             
@@ -179,10 +179,10 @@ namespace CORM
                 var objTemp = new T();
                 foreach (var property in typeof(T).GetProperties())
                 {
-                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
-                        CormColumn attr = objAttrs[0] as CormColumn;
+                        Column attr = objAttrs[0] as Column;
                         try
                         {
                             if (reader[attr.Name] != null)
@@ -223,10 +223,10 @@ namespace CORM
                 if (value != null)
                 {
                     // 从注解厘米拿到具体的字段名称，拼接
-                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
-                        CormColumn attr = objAttrs[0] as CormColumn;
+                        Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
                             resWhereQuery += " " + attr.Name + "=@" + attr.Name + " and";

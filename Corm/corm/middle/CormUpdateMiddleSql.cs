@@ -74,10 +74,10 @@ namespace CORM
             foreach (var property in properties)
             {
                 // 从注解拿到具体的字段名称，拼接
-                var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                 if (objAttrs.Length > 0)
                 {
-                    CormColumn attr = objAttrs[0] as CormColumn;
+                    Column attr = objAttrs[0] as Column;
                     if (attr == null)
                     {
                         continue;
@@ -151,10 +151,10 @@ namespace CORM
                 if (value != null)
                 {
                     // 从注解厘米拿到具体的字段名称，拼接
-                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
-                        CormColumn attr = objAttrs[0] as CormColumn;
+                        Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
                             resWhereQuery += " " + attr.Name + "=@" + attr.Name + flagForOldValue + " and";
@@ -187,10 +187,10 @@ namespace CORM
                 if (value != null)
                 {
                     // 从注解厘米拿到具体的字段名称，拼接
-                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
-                        CormColumn attr = objAttrs[0] as CormColumn;
+                        Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
                             resWhereQuery += " " + attr.Name + "=@" + attr.Name + flagForValueQuery + " and";

@@ -112,10 +112,10 @@ namespace CORM
                 {
                     var param = new SqlParameter();
                     // 从注解拿到具体的字段名称，拼接
-                    var objAttrs = property.GetCustomAttributes(typeof(CormColumn), true);
+                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
-                        CormColumn attr = objAttrs[0] as CormColumn;
+                        Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
                             // 创建 param 以填充 sqlBuff 当中的占位符

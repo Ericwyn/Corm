@@ -6,7 +6,7 @@ namespace CORM.attrs
     [AttributeUsage(AttributeTargets.Field |
                     AttributeTargets.Property,
         AllowMultiple = false)]
-    public class CormColumn : System.Attribute
+    public class Column : System.Attribute
     {
         private string name;
 
