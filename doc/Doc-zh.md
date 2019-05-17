@@ -26,6 +26,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
     }
 
  - 需要使用可空类型，例如 int?、double?、bool? ，否则 Where 查询会有错误
+ - **Entity类的属性都需要将get 和 set 都写为 public**，否则无法使用反射 set 和 get 到具体的 value
 
 ### 使用 Corm 完成数据库操作
 
