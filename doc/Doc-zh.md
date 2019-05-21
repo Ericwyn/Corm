@@ -110,6 +110,9 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
             }
         ).Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
         Console.WriteLine(list);
+ 
+ - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取
+    - `CommitForReader()` 方法同样支持事务操作
 
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象

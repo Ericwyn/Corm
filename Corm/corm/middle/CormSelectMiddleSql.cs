@@ -93,6 +93,18 @@ namespace CORM
         
         public List<T> Commit(SqlTransaction transaction)
         {
+            var reader = CommitForReader(transaction);
+            var resList = parseSqlDataReader(reader);
+            return resList;
+        }
+        
+        public SqlDataReader CommitForReader()
+        {
+            return CommitForReader(null);
+        }
+        
+        public SqlDataReader CommitForReader(SqlTransaction transaction)
+        {
             if (customizeSqlCommand != null && 
                 (!attributes.Equals("*") || whereObj != null))
             {
@@ -108,8 +120,7 @@ namespace CORM
                     customizeSqlCommand.Transaction = transaction;
                 }
                 reader = customizeSqlCommand.ExecuteReader();
-                resList = parseSqlDataReader(reader);
-                return resList;
+                return reader;
             }
             // 拼接 TOP 语句
             var topQuery = "";
@@ -178,10 +189,9 @@ namespace CORM
                 sqlCommend.Transaction = transaction;
             }
             reader = sqlCommend.ExecuteReader();
-            resList = parseSqlDataReader(reader);
-            return resList;
+            return reader;
         }
-
+        
         // 使用自定义的 Sql 语句进行查询
         public CormSelectMiddleSql<T> Customize(string sqlStr)
         {
