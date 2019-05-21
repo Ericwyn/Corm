@@ -60,7 +60,19 @@ namespace CORM
             var list = studentTable.Find().All().Top(1).Commit();
             Console.WriteLine(list);
             */
-                        
+             
+            
+            // SELECT Like 查询
+            // 将会得到 
+            //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
+            //
+            var list = studentTable.Find()
+                .WhereLike("studentName_", "test")
+                .WhereLike("studentAge_", "2")
+                .Commit();
+            Console.WriteLine(list.Count);
+            
+            
             /*
             // SELECT 自定义查询语句
             var list = studentTable.Find().Customize(

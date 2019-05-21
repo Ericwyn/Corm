@@ -27,6 +27,9 @@ namespace CORM
         // Top 数量
         private int topNum = -1;
         
+        // like 查询
+        private List<LikeQueryStruct> likeQueryList;
+        
         public CormSelectMiddleSql(CormTable<T> cormTable)
         {
             this._cormTable = cormTable;
@@ -59,6 +62,22 @@ namespace CORM
             this.whereObj = set;
             return this;
         }
+        
+        // Like 查询, 字符串 Like
+        public CormSelectMiddleSql<T> WhereLike(string columnName, string likeStr)
+        {
+            if (likeQueryList == null)
+            {
+                likeQueryList = new List<LikeQueryStruct>();
+            }
+            likeQueryList.Add(new LikeQueryStruct()
+            {
+                column = columnName,
+                query = likeStr,
+            });
+            return this;
+        }
+
         
         // Top 设置
         public CormSelectMiddleSql<T> Top(int num)
@@ -98,14 +117,35 @@ namespace CORM
             {
                 topQuery = " TOP(" + topNum + ") ";
             }
-            
+
             sqlBuff = "SELECT " + topQuery + attributes + " FROM " + this.tableName +" ";
             // 拼接 Where 语句
             sqlBuff = sqlBuff + "\n" + GetWhereQuery(this.whereObj) + " ";
-            // TODO 拼接 TOP
+            // 拼接 LIKE 字符串语句
+            var whereLikeQUery = GetWhereLikeQuery(this.likeQueryList);
+            if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
+            {
+                if (sqlBuff.Contains("WHERE"))
+                {
+                    sqlBuff = sqlBuff + " AND " + whereLikeQUery;
+                }
+                else
+                {
+                    sqlBuff = sqlBuff + " WHERE " + whereLikeQUery;
+                }
+
+            }
             // 拼接 ";"
             sqlBuff += ";";
             var sqlCommend = new SqlCommand(sqlBuff, _cormTable._corm._sqlConnection);
+//            if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals("")) sqlCommend.Parameters.Add(GetWhereLikeParam(likeQueryList));
+            if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
+            {
+                foreach (var parameter in GetWhereLikeParam(likeQueryList))
+                {
+                    sqlCommend.Parameters.Add(parameter);
+                }
+            }
             var properties = typeof(T).GetProperties();
 
             if (sqlBuff.Contains("WHERE "))
@@ -241,5 +281,47 @@ namespace CORM
             return resWhereQuery;
         }
         
+        /*
+         * 得到 Like 语句部分
+         */
+        private static string GetWhereLikeQuery(List<LikeQueryStruct> list)
+        {
+            if (list == null){
+                return "";
+            }
+            var resWhereQuery = "";
+            
+            for (int i = 0; i < list.Count; i++)
+            {
+                resWhereQuery += list[i].column + " LIKE @WHERE_LIKE_PARAM_" + i + " AND ";
+            }
+            if (resWhereQuery.Length > 4)
+            {
+                resWhereQuery = resWhereQuery.Substring(0, resWhereQuery.Length - 4);
+            }
+            return resWhereQuery;
+        }
+        
+        /*
+         * 得到 Like 预编译语句的 SQLParamter
+         */
+        private static List<SqlParameter> GetWhereLikeParam(List<LikeQueryStruct> list)
+        {
+            if (list == null){
+                return null;
+            }
+            var resWhereQuery = new List<SqlParameter>();
+            for (int i = 0; i < list.Count; i++)
+            {
+                resWhereQuery.Add(new SqlParameter("@WHERE_LIKE_PARAM_"+i, "%" + list[i].query + "%"));
+            }
+            return resWhereQuery;
+        }
+        
+        public class LikeQueryStruct
+        {
+            public string column { get; set; }
+            public string query { get; set; }
+        }
     }
 }

@@ -68,7 +68,28 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
     此处命名可能会有误解，**`All()` 方法指的字段的 All ，而此处的 Top n 指的是查询行数** 
 
         List<Student> list = studentTable.Find().All().Top(1).Commit();
-        
+ 
+ - Like 查询
+    
+    Corm 支持简单的 Like 查询，只需要调用 WhereLike 方法就可以了，接受两个参数
+     - 第一个参数是 column Name
+     - 第二个参数是具体的 Like 的内容
+     - 例如使用 `.WhereLike("studentName_", "test")` 将会在 Sql 语句当中拼接 `studentName_ LIKE '%test%'`
+     - WhereLike 方法可多次调用，拼接的语句会使用 AND 进行连接
+     
+     示例代码如下
+     
+         // SELECT Like 查询
+         // 将会使用 LIKE 语句如下
+         // 
+         //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
+         //
+         var list = studentTable.Find()
+             .WhereLike("studentName_", "test")
+             .WhereLike("studentAge_", "2")
+             .Commit();
+         Console.WriteLine(list.Count);
+ 
  - 手写 Sql 语句进行查询
  
     Corm 支持传入手写的 Sql 语句进行查询，也会自动解析成 Entity 类的 List，并且也提供了事务的支持，可使用以下两个方法
