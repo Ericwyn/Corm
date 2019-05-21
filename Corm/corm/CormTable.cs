@@ -9,8 +9,7 @@ namespace CORM
     {
         public Corm _corm { get; }
         public string _tableName { get; }
-        private List<string> columnNameTemp = new List<string>();
-        public List<string> ColumnNameTemp => columnNameTemp;
+        public List<string> ColumnNameTemp { get; }
         
         public CormTable(Corm corm)
         {
@@ -32,6 +31,7 @@ namespace CORM
                                         "请使用 [CormTable(TableName=\"xxx\")] 或在CormTable 构造函数中指定");
    
             }
+            this.ColumnNameTemp = new List<string>();
             foreach (var property in properties)
             {
                 var objAttrs = property.GetCustomAttributes(typeof(Column), true);
@@ -40,7 +40,7 @@ namespace CORM
                     Column attr = objAttrs[0] as Column;
                     if (attr != null)
                     {
-                        this.columnNameTemp.Add(attr.Name);
+                        this.ColumnNameTemp.Add(attr.Name);
                     }
                 }
             }
@@ -59,7 +59,7 @@ namespace CORM
                     Column attr = objAttrs[0] as Column;
                     if (attr != null)
                     {
-                        this.columnNameTemp.Add(attr.Name);
+                        this.ColumnNameTemp.Add(attr.Name);
                     }
                 }
             }
