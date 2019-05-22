@@ -74,7 +74,6 @@ namespace CORM
                 if (_connectStr == null || _connectStr.Trim() == "")
                 {
                     throw new CormException("创建 Corm 对象时候，ConnectStr 错误");
-                    return null;
                 }
                 return new Corm(_connectStr, new CormLogUtils(this._sqlPrintCb));
             }

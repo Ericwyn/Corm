@@ -111,9 +111,32 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
         ).Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
         Console.WriteLine(list);
  
- - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取
+ - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 ``方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取
     - `CommitForReader()` 方法同样支持事务操作
-
+ 
+ - 自定义对 SqlDataReader 的解析
+    
+   Corm 可以帮助你把 SqlDataReader 解析成任何类型，只需要使用工具类 SqlDataReaderParse<T> 就好了
+    
+   - T 是临时创建的数据解析结构体，类似于 Entity 类，需要使用 `[Coloum]` 来标记属性，只需要注明其 Name 属性就可以来
+   
+         private class TempStruct
+         {
+             [Column(Name = "name")]
+             public string Name { get; set; }
+             [Column(Name = "age")]
+             public string Age { get; set; }
+         }
+   
+   - 配置 CommitForReader() 方法使用，示例代码如下
+    
+         var sql = @"SELECT 
+                         studentName_ as name, 
+                         studentAge_ as age 
+                     FROM Student ";
+         SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
+         List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true); 
+ 
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
 

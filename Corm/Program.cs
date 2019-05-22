@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
+using System.Security.Policy;
 using CORM.utils;
 using CORM.attrs;
 
@@ -27,6 +30,14 @@ namespace CORM
                 sql = sql.Replace("  ", " ");
                 Console.WriteLine(sql);
             }
+        }
+
+        private class TempStruct
+        {
+            [Column(Name = "name")]
+            public string Name { get; set; }
+            [Column(Name = "age")]
+            public string Age { get; set; }
         }
         
         public static void Main(string[] args)
@@ -61,7 +72,7 @@ namespace CORM
             Console.WriteLine(list);
             */
              
-            
+            /*
             // SELECT Like 查询
             // 将会得到 
             //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
@@ -71,6 +82,20 @@ namespace CORM
                 .WhereLike("studentAge_", "2")
                 .Commit();
             Console.WriteLine(list.Count);
+            */
+            
+            
+            /*
+            // 直接返回 SqlDataReader
+            // 并使用 SqlDataReaderParse 工具解析 reader
+            var sql = @"SELECT 
+                            studentName_ as name, 
+                            studentAge_ as age 
+                        FROM Student ";
+            SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
+            List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true);
+            Console.WriteLine(list);
+            */
             
             
             /*

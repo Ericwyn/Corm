@@ -48,6 +48,7 @@
     <Compile Include="corm\middle\CormUpdateMiddleSql.cs" />
     <Compile Include="corm\utils\CormException.cs" />
     <Compile Include="corm\utils\CormLogUtils.cs" />
+    <Compile Include="corm\utils\SqlDataReaderParse.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

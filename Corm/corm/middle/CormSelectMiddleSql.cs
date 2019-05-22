@@ -94,7 +94,7 @@ namespace CORM
         public List<T> Commit(SqlTransaction transaction)
         {
             var reader = CommitForReader(transaction);
-            var resList = parseSqlDataReader(reader);
+            var resList = SqlDataReaderParse<T>.parse(reader, true);
             return resList;
         }
         
@@ -112,7 +112,6 @@ namespace CORM
             }
 
             SqlDataReader reader;
-            List<T> resList;
             if (customizeSqlCommand != null)
             {
                 if (transaction != null)
@@ -216,49 +215,7 @@ namespace CORM
 
             return this;
         }
-        
-        
-        /*
-         * 解析 SqlDataReader
-         */
-        private List<T> parseSqlDataReader(SqlDataReader reader)
-        {
-            var resList = new List<T>();
-            
-            while(reader.Read()) {
-                var objTemp = new T();
-                foreach (var property in typeof(T).GetProperties())
-                {
-                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
-                    if (objAttrs.Length > 0)
-                    {
-                        Column attr = objAttrs[0] as Column;
-                        try
-                        {
-                            if (reader[attr.Name] != null)
-                            {
-                                if (reader[attr.Name] is DBNull)
-                                {
-                                    property.SetValue(objTemp, null);
-                                }
-                                else
-                                {
-                                    property.SetValue(objTemp, reader[attr.Name]);
-                                }
-                            }
-                        }
-                        catch (IndexOutOfRangeException e)
-                        {
-                            // 只查询特定字段的时候会触发此处异常
-                        }
-                    }
-                }
-                resList.Add(objTemp);
-            }
-            reader.Close();
-            return resList;
-        }
-        
+
         private static string GetWhereQuery(T obj)
         {
             if (obj == null){

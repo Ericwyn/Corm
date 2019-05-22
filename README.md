@@ -35,7 +35,8 @@
 	 - 按特定条件删除
  - 支持事务
  - ~~启动时候对 Entity 结构进行判断~~
- - 自动解析SqlDataReader
+ - 自动解析 SqlDataReader
+    - 支持自定义解析类型
  - 自定义 Sql 和日志打印的回调
  - Build模式，初始化和创建
 
