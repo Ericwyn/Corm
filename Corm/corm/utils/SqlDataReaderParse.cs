@@ -7,7 +7,13 @@ namespace CORM.utils
 {
     public class SqlDataReaderParse<T> where T : new()
     {
+        
         public static List<T> parse(SqlDataReader reader, bool closeReader)
+        {
+            return parse(reader, closeReader, false);
+        }
+        
+        public static List<T> parse(SqlDataReader reader, bool closeReader, bool noCloumn)
         {
             var resList = new List<T>();
             
@@ -15,28 +21,46 @@ namespace CORM.utils
                 var objTemp = new T();
                 foreach (var property in typeof(T).GetProperties())
                 {
-                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
-                    if (objAttrs.Length > 0)
+                    try
                     {
-                        Column attr = objAttrs[0] as Column;
-                        try
+                        if (noCloumn)
                         {
-                            if (reader[attr.Name] != null)
+                            if (reader[property.Name] != null)
                             {
-                                if (reader[attr.Name] is DBNull)
+                                if (reader[property.Name] is DBNull)
                                 {
                                     property.SetValue(objTemp, null);
                                 }
                                 else
                                 {
-                                    property.SetValue(objTemp, reader[attr.Name]);
+                                    property.SetValue(objTemp, reader[property.Name]);
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            var objAttrs = property.GetCustomAttributes(typeof(Column), true);
+                            if (objAttrs.Length > 0)
+                            {
+                                Column attr = objAttrs[0] as Column;
+                                if (reader[attr.Name] != null)
+                                {
+                                    if (reader[attr.Name] is DBNull)
+                                    {
+                                        property.SetValue(objTemp, null);
+                                    }
+                                    else
+                                    {
+                                        property.SetValue(objTemp, reader[attr.Name]);
+                                    }
                                 }
                             }
                         }
-                        catch (IndexOutOfRangeException e)
-                        {
-                            // 只查询特定字段的时候会触发此处异常
-                        }
+                    }
+                    catch (IndexOutOfRangeException e)
+                    {
+
                     }
                 }
                 resList.Add(objTemp);
@@ -48,5 +72,6 @@ namespace CORM.utils
             }
             return resList;
         }
+        
     }
 }

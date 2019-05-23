@@ -128,6 +128,8 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
              public string Age { get; set; }
          }
    
+   - T 也可以不使用 `[Colunm]` 来标记，Reader 读取的时候会直接使用该属性的反射得到的 Name,作为 Reader 读取数据的 key
+   
    - 配置 CommitForReader() 方法使用，示例代码如下
     
          var sql = @"SELECT 

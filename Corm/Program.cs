@@ -37,7 +37,7 @@ namespace CORM
             [Column(Name = "name")]
             public string Name { get; set; }
             [Column(Name = "age")]
-            public string Age { get; set; }
+            public int? Age { get; set; }
         }
         
         public static void Main(string[] args)
@@ -47,10 +47,12 @@ namespace CORM
                 .SqlPrint(new CustomSqlPrintCb())
                 .Build();
             var studentTable = new CormTable<Student>(corm);
-
+            
+            /*
             // SELECT 查询全部数据
             var students = studentTable.Find().All().Commit();
             Console.WriteLine(students.Count);
+            */
             
             /*
             // SELECT 按 where 条件查询
@@ -85,7 +87,7 @@ namespace CORM
             */
             
             
-            /*
+            
             // 直接返回 SqlDataReader
             // 并使用 SqlDataReaderParse 工具解析 reader
             var sql = @"SELECT 
@@ -93,9 +95,9 @@ namespace CORM
                             studentAge_ as age 
                         FROM Student ";
             SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
-            List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true);
+            List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true, true);
             Console.WriteLine(list);
-            */
+            
             
             
             /*
