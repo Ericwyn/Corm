@@ -27,8 +27,8 @@ namespace CORM
         // Top 数量
         private int topNum = -1;
 
-        private string[] orderByAttributes;
-        private string[] orderDescByAttributes;
+        private string[] orderByAttributes = {};
+        private string[] orderDescByAttributes = {};
         
         // like 查询
         private List<LikeQueryStruct> likeQueryList;
@@ -244,11 +244,11 @@ namespace CORM
             resOrderQuery = " ORDER BY ";
             foreach (var att in orderByList)
             {
-                resOrderQuery += "`" + att + "` ASC, ";
+                resOrderQuery += att + " ASC, ";
             }
             foreach (var att in orderDescByList)
             {
-                resOrderQuery += "`" + att + "` DESC, ";
+                resOrderQuery += att + " DESC, ";
             }
             resOrderQuery = resOrderQuery.Substring(0, resOrderQuery.Length - 2);
             return resOrderQuery;
