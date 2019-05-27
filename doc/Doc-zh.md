@@ -69,6 +69,13 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
         List<Student> list = studentTable.Find().All().Top(1).Commit();
  
+ - Order By ASC | DESC 排序
+ 
+        // Order By ASC 排序
+        var list = studentTable.Find().All().OrderBy(new string[] {"age"}).Commit();
+        // Order By DESC 排序
+        list = studentTable.Find().All().OrderDescBy(new string[] {"age"}).Commit();
+ 
  - Like 查询
     
     Corm 支持简单的 Like 查询，只需要调用 WhereLike 方法就可以了，接受两个参数

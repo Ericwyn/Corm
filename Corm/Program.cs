@@ -55,6 +55,15 @@ namespace CORM
             */
             
             /*
+            // Order By ASC 排序
+            var list = studentTable.Find().All().OrderBy(new string[] {"age"}).Commit();
+            Console.WriteLine(list.Count);
+            // Order By DESC 排序
+            list = studentTable.Find().All().OrderDescBy(new string[] {"age"}).Commit();
+            Console.WriteLine(list.Count);
+            */
+            
+            /*
             // SELECT 按 where 条件查询
             var st = new Student();
             st.studentAge = 10;
@@ -67,13 +76,13 @@ namespace CORM
             var list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
             */
-            
+
             /*
             // SELECT 只查询前 n 条
             var list = studentTable.Find().All().Top(1).Commit();
             Console.WriteLine(list);
             */
-             
+
             /*
             // SELECT Like 查询
             // 将会得到 
@@ -85,9 +94,9 @@ namespace CORM
                 .Commit();
             Console.WriteLine(list.Count);
             */
-            
-            
-            
+
+
+            /*
             // 直接返回 SqlDataReader
             // 并使用 SqlDataReaderParse 工具解析 reader
             var sql = @"SELECT 
@@ -97,9 +106,8 @@ namespace CORM
             SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
             List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true, true);
             Console.WriteLine(list);
-            
-            
-            
+            */
+
             /*
             // SELECT 自定义查询语句
             var list = studentTable.Find().Customize(

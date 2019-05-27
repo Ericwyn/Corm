@@ -22,6 +22,7 @@
 	 - 将返回结果的自动封装成 List<T>
 	 - 手写 Sql 语句进行查询(同样支持事务)
 	 - 只查询 Top n 条
+	 - Order By ASC | DESC 排序
      - ~~分页 查询~~
      - ~~Join 查询~~
  - 添加 Insert
