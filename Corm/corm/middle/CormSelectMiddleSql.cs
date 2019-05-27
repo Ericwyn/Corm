@@ -26,6 +26,9 @@ namespace CORM
         private SqlCommand customizeSqlCommand;
         // Top 数量
         private int topNum = -1;
+
+        private string[] orderByAttributes;
+        private string[] orderDescByAttributes;
         
         // like 查询
         private List<LikeQueryStruct> likeQueryList;
@@ -78,7 +81,19 @@ namespace CORM
             return this;
         }
 
-        
+        // 正序排列
+        public CormSelectMiddleSql<T> OrderBy(string[] atts)
+        {
+            this.orderByAttributes = atts;
+            return this;
+        }
+
+        // 倒序排列
+        public CormSelectMiddleSql<T> OrderDescBy(string[] atts)
+        {
+            this.orderDescByAttributes = atts;
+            return this;
+        }
         // Top 设置
         public CormSelectMiddleSql<T> Top(int num)
         {
@@ -145,6 +160,7 @@ namespace CORM
                 }
 
             }
+            sqlBuff += GetOrderQuery(this.orderByAttributes, this.orderDescByAttributes);
             // 拼接 ";"
             sqlBuff += ";";
             var sqlCommend = new SqlCommand(sqlBuff, _cormTable._corm._sqlConnection);
@@ -215,7 +231,30 @@ namespace CORM
 
             return this;
         }
+        
+        // 得到 Sort 语句
+        private static string GetOrderQuery(string[] orderByList, string[] orderDescByList)
+        {
+            var resOrderQuery = "";
+            if ((orderByList == null || orderByList.Length == 0) && (orderDescByList == null || orderDescByList.Length == 0))
+            {
+                return resOrderQuery;
+            }
 
+            resOrderQuery = " ORDER BY ";
+            foreach (var att in orderByList)
+            {
+                resOrderQuery += "`" + att + "` ASC, ";
+            }
+            foreach (var att in orderDescByList)
+            {
+                resOrderQuery += "`" + att + "` DESC, ";
+            }
+            resOrderQuery = resOrderQuery.Substring(0, resOrderQuery.Length - 2);
+            return resOrderQuery;
+        }
+        
+        // 得到 where 语句
         private static string GetWhereQuery(T obj)
         {
             if (obj == null){
