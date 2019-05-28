@@ -37,7 +37,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
                 .SqlPrint(new CustomSqlPrintCb())
                 .Build();
             var studentTable = new CormTable<Student>(corm);
-            List<Student> studentTable.Find().All().Commit();
+            List<Student> studentTable.Find().Commit();
         }
 
  - Corm 由 Corm.CormBuilder类创建，需要传入 SqlConnection String，可以传入 SqlPrintCB 自定义 sql 打印 
@@ -48,7 +48,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 ### Select 查询操作
  - Find All
     
-        List<Student> list = studentTable.Find().All().Commit();
+        List<Student> list = studentTable.Find().Commit();
  
  - 带 Where 的查询
         
@@ -67,14 +67,14 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
     
     此处命名可能会有误解，**`All()` 方法指的字段的 All ，而此处的 Top n 指的是查询行数** 
 
-        List<Student> list = studentTable.Find().All().Top(1).Commit();
+        List<Student> list = studentTable.Find().Top(1).Commit();
  
  - Order By ASC | DESC 排序
  
         // Order By ASC 排序
-        var list = studentTable.Find().All().OrderBy(new string[] {"age"}).Commit();
+        var list = studentTable.Find().OrderBy(new string[] {"age"}).Commit();
         // Order By DESC 排序
-        list = studentTable.Find().All().OrderDescBy(new string[] {"age"}).Commit();
+        list = studentTable.Find().OrderDescBy(new string[] {"age"}).Commit();
  
  - Like 查询
     
@@ -118,7 +118,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
         ).Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
         Console.WriteLine(list);
  
- - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 ``方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取
+ - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 `SqlDataReaderParse<T>.parse()`方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取和解析
     - `CommitForReader()` 方法同样支持事务操作
  
  - 自定义对 SqlDataReader 的解析
@@ -148,9 +148,6 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
  
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
-
-Insert 是一个事务操作，当插入失败时候，整个插入操作将会回滚
-
 
  - Insert 一条数据
         
