@@ -144,7 +144,7 @@ namespace CORM
             }
             if (resWhereQuery.EndsWith("and"))
             {
-                resWhereQuery = "WHERE "+resWhereQuery.Substring(0, resWhereQuery.Length - 4);
+                resWhereQuery = "WHERE "+resWhereQuery.Substring(0, resWhereQuery.Length - 3);
             }
             return resWhereQuery;
         }
