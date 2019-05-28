@@ -47,19 +47,19 @@ namespace CORM
                 .SqlPrint(new CustomSqlPrintCb())
                 .Build();
             var studentTable = new CormTable<Student>(corm);
+
+            List<Student> students;
             
-            /*
             // SELECT 查询全部数据
-            var students = studentTable.Find().All().Commit();
+            students = studentTable.Find().Commit();
             Console.WriteLine(students.Count);
-            */
             
             /*
             // Order By ASC 排序
-            var list = studentTable.Find().All().OrderBy(new string[] {"age"}).Commit();
+            var list = studentTable.Find().OrderBy(new string[] {"age"}).Commit();
             Console.WriteLine(list.Count);
             // Order By DESC 排序
-            list = studentTable.Find().All().OrderDescBy(new string[] {"age"}).Commit();
+            list = studentTable.Find().OrderDescBy(new string[] {"age"}).Commit();
             Console.WriteLine(list.Count);
             */
             
@@ -79,7 +79,7 @@ namespace CORM
 
             /*
             // SELECT 只查询前 n 条
-            var list = studentTable.Find().All().Top(1).Commit();
+            var list = studentTable.Find().Top(1).Commit();
             Console.WriteLine(list);
             */
 

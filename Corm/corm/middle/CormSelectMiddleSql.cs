@@ -39,14 +39,15 @@ namespace CORM
             this.tableName = _cormTable._tableName;
             this.columnNameTemp = cormTable.ColumnNameTemp;
         }
-
-        // 查询全部
-        public CormSelectMiddleSql<T> All()
-        {
-            this.attributes = "*";
-            return this;
-        }
         
+//        // API 命名易混淆，删除
+//        // 查询全部
+//        public CormSelectMiddleSql<T> All()
+//        {
+//            this.attributes = "*";
+//            return this;
+//        }
+//        
         // 查询几个属性
         public CormSelectMiddleSql<T> Attributes(string[] columnNames)
         {
