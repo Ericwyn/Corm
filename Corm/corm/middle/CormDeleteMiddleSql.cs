@@ -111,6 +111,10 @@ namespace CORM
             else
             {
                 SqlCommand sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+                foreach (SqlParameter param in paramList)
+                {
+                    sqlCommand.Parameters.Add(param);
+                }
                 resDeleteSize = sqlCommand.ExecuteNonQuery();
             }
             if (resDeleteSize < 0)
