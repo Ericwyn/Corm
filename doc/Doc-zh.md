@@ -211,33 +211,36 @@ Delete 操作可选择删除表中全部数据，或按照特定条件删除
 
 ### 事务的支持
 
-Corm 支持事务，使用的时候，需要先利用 Corm 创建一个事务，然后将该事务作为方法参数，传入到具体的操作最后的 Commit() 方法当中
+Corm 支持事务
+
+当使用事务的时候，需要先通过 CormTable<T> 实例对象的 BeginTransaction() 创建一个 CormTransaction
+
+CormTransaction 缓存一次事务操作中，多个 Sql 操作所共同需要的 SqlConnection 和 SqlTransaction
+
+在事务都执行之后，使用 CormTransaction 对象的 Commit 方法进行事务提交，发生异常的话就使用 Rollback 方法回滚
 
 具体示例代码如下
 
-    // 无事务支持，可成功插入
-    studentTable.Insert()
-        .Value(new Student() {studentName = "noneTrans"})
-        .Commit();
-    // 事务操作，
-    using (var transaction = studentTable.BeginTransaction())
+    // 事务操作示例
+    using (CormTransaction transaction = studentTable.BeginTransaction())
     {
         try
         {
-            // 插入测试，如果事务无法完成的话，那么这行插入将无法成功
             studentTable.Insert()
-                .Value(new Student() {studentName = "trans1"})
+                .Value(new Student() {studentName = "oldName"})
                 .Commit(transaction);
-            // 查找到 studentName 为 "oldName" 的行
-            var list = studentTable.Find()
+            list = studentTable.Find()
                 .Where(new Student() {studentName = "oldName"})
                 .Commit(transaction);
-            // 将该行的 studentName 更新为 "newName"
-            // 如果数据库当中不存在
             studentTable.Update()
                 .Where(new Student() {studentName = list[0].studentName})
                 .Value(new Student() {studentName = "newName"})
                 .Commit(transaction);
+            var sql = @"SELECT * FROM student WHERE studentName_= @studentName_";
+            var list2 = studentTable.Find()
+                .Customize(sql,new[] {new SqlParameter("studentName_", "newName"),})
+                .Commit(transaction);
+            Console.WriteLine(list2.Count);
             transaction.Commit();
         }
         catch (Exception e)
@@ -246,3 +249,4 @@ Corm 支持事务，使用的时候，需要先利用 Corm 创建一个事务，
             transaction.Rollback();
         }
     }
+    
