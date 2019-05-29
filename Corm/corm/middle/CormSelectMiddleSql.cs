@@ -141,9 +141,12 @@ namespace CORM
                 else
                 {
                     sqlCommand = new SqlCommand(customizeSqlBuff, this._cormTable._corm._sqlConnection);
-                    foreach (SqlParameter param in customizeSqlParamList)
+                    if (customizeSqlParamList != null && customizeSqlParamList.Count > 0)
                     {
-                        sqlCommand.Parameters.Add(param);
+                        foreach (SqlParameter param in customizeSqlParamList)
+                        {
+                            sqlCommand.Parameters.Add(param);
+                        }
                     }
                     reader = sqlCommand.ExecuteReader();
                 }
