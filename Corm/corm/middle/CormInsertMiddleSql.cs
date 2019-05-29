@@ -54,7 +54,7 @@ namespace CORM
          * TODO 分成多次执行，例如当一次性插入数量超过 1000 的时候，分成多个批次，每个批次 1000 行
          * 
          */
-        public int Commit(SqlTransaction transaction)
+        public int Commit(CormTransaction transaction)
         {
             // 通过这个 Flag 来标记插入多行数据时候，每一行不同的占位符
             // 占位符规则为 "@" + columnName + flag + itemIndex
@@ -99,9 +99,8 @@ namespace CORM
 
             
             // 开始执行事务
-//            var transaction = _cormTable._corm._sqlConnection.BeginTransaction();
-            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
-
+//            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+            List<SqlParameter> paramList = new List<SqlParameter>(); 
             T insertObj;
             for (var i = 0; i < insertTempList.Count; i++)
             {
@@ -131,7 +130,7 @@ namespace CORM
                                 // 当找不到值的时候就用 DBNull.value 代替，插入的时候将会插入 null
                                 param.Value = DBNull.Value;
                             }
-                            sqlCommand.Parameters.Add(param);
+                            paramList.Add(param);
                         }
                     }
                 }
@@ -141,15 +140,29 @@ namespace CORM
             int resColSize = -1;
             if (transaction != null)
             {
-                // 事务操作
-                sqlCommand.Transaction = transaction;
+                // 如果是有事务操作的话，就把需要执行的语句保存到 CormTransaction 里面
+                // 使用 Trans里面共同的 Connection
+                // 和其他事务一起调用和返回
+                resColSize = transaction.AddSql(sqlBuff, paramList).ExecuteNonQuery();
+                if (resColSize < 0)
+                {
+                    throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
+                }
+                return resColSize;
             }
-
-            if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
+            else
             {
-                throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
+                var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+                foreach (SqlParameter param in paramList)
+                {
+                    sqlCommand.Parameters.Add(param);
+                }
+                if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
+                {
+                    throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
+                }
+                return resColSize;
             }
-            return resColSize;
         }
     }
 }

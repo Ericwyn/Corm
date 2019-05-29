@@ -50,7 +50,7 @@ namespace CORM
             return Commit(null);
         }
         
-        public int Commit(SqlTransaction transaction)
+        public int Commit(CormTransaction transaction)
         {
             int resUpdateSize = -1;
             if (updateObj == null || whereObj == null)
@@ -68,8 +68,8 @@ namespace CORM
                       "\n" 
                       + GetValueQuery(updateObj) + " " + GetWhereQuery(whereObj) +" ;";
             
-            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
-            
+//            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+            List<SqlParameter> paramList = new List<SqlParameter>(); 
             var properties = typeof(T).GetProperties();
             foreach (var property in properties)
             {
@@ -97,7 +97,7 @@ namespace CORM
                         {
                             throw new CormException("UPDATE 操作当中，WHERE 语句拼接错误");
                         }
-                        sqlCommand.Parameters.Add(param);
+                        paramList.Add(param);
                     }
 
                     if (sqlBuff.Contains(attr.Name + flagForValueQuery))
@@ -115,7 +115,7 @@ namespace CORM
                         {
                             throw new CormException("UPDATE 操作当中, SET 语句拼接错误");
                         }
-                        sqlCommand.Parameters.Add(param);
+                        paramList.Add(param);
                     }
                 }
             }
@@ -123,9 +123,17 @@ namespace CORM
             this._cormTable.SqlLog(sqlBuff);
             if (transaction != null)
             {
-                sqlCommand.Transaction = transaction;
+                resUpdateSize = transaction.AddSql(sqlBuff, paramList).ExecuteNonQuery();
             }
-            resUpdateSize = sqlCommand.ExecuteNonQuery();
+            else
+            {
+                var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+                foreach (SqlParameter param in paramList)
+                {
+                    sqlCommand.Parameters.Add(param);
+                }
+                resUpdateSize = sqlCommand.ExecuteNonQuery();
+            }
             if (resUpdateSize < 0)
             {
                 throw new CormException(" UPDATE 操作，受影响操作函数 < 0，请检查是否有错误");

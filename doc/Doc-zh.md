@@ -220,7 +220,7 @@ Corm 支持事务，使用的时候，需要先利用 Corm 创建一个事务，
         .Value(new Student() {studentName = "noneTrans"})
         .Commit();
     // 事务操作，
-    using (var transaction = corm.BeginTransaction())
+    using (var transaction = studentTable.BeginTransaction())
     {
         try
         {

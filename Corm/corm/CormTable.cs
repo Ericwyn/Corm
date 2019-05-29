@@ -88,6 +88,11 @@ namespace CORM
         {
             return new CormDeleteMiddleSql<T>(this);
         }
+
+        public CormTransaction BeginTransaction()
+        {
+            return new CormTransaction(this._corm);
+        }
         
         public SqlCommand SqlCommand(string sql)
         {

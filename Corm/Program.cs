@@ -48,47 +48,47 @@ namespace CORM
                 .Build();
             var studentTable = new CormTable<Student>(corm);
 
-            List<Student> students;
-            
-            // SELECT 查询全部数据
-            students = studentTable.Find().Commit();
-            Console.WriteLine(students.Count);
+            List<Student> list;
             
             /*
+            // SELECT 查询全部数据
+            list = studentTable.Find().Commit();
+            Console.WriteLine(list.Count);
+            
+            
             // Order By ASC 排序
-            var list = studentTable.Find().OrderBy(new string[] {"age"}).Commit();
+            list = studentTable.Find().OrderBy(new string[] {"studentAge_"}).Commit();
             Console.WriteLine(list.Count);
             // Order By DESC 排序
-            list = studentTable.Find().OrderDescBy(new string[] {"age"}).Commit();
+            list = studentTable.Find().OrderDescBy(new string[] {"studentAge_"}).Commit();
             Console.WriteLine(list.Count);
-            */
             
-            /*
+            
+            
             // SELECT 按 where 条件查询
             var st = new Student();
             st.studentAge = 10;
-            var students = studentTable.Find().Where(st).Commit();
-            Console.WriteLine(students.Count);
-            */
-
-            /*
-            // SELECT 查询特定的属性
-            var list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
+            list = studentTable.Find().Where(st).Commit();
             Console.WriteLine(list.Count);
-            */
+            
+            
+            // SELECT 查询特定的属性
+            list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
+            Console.WriteLine(list.Count);
+            
 
-            /*
+            
             // SELECT 只查询前 n 条
-            var list = studentTable.Find().Top(1).Commit();
-            Console.WriteLine(list);
-            */
+            list = studentTable.Find().Top(1).Commit();
+            Console.WriteLine(list.Count);
+            
 
-            /*
+            
             // SELECT Like 查询
             // 将会得到 
             //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
             //
-            var list = studentTable.Find()
+            list = studentTable.Find()
                 .WhereLike("studentName_", "test")
                 .WhereLike("studentAge_", "2")
                 .Commit();
@@ -104,20 +104,20 @@ namespace CORM
                             studentAge_ as age 
                         FROM Student ";
             SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
-            List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true, true);
-            Console.WriteLine(list);
+            List<TempStruct> listTemp = SqlDataReaderParse<TempStruct>.parse(reader, true, true);
+            Console.WriteLine(listTemp.Count);
             */
 
             /*
             // SELECT 自定义查询语句
-            var list = studentTable.Find().Customize(
+            list = studentTable.Find().Customize(
                 "SELECT * FROM Student WHERE studentName_=@studentName_",
                 new SqlParameter[]
                 {
                     new SqlParameter("@studentName_", "test3"),
                 }
             ).Commit();
-            Console.WriteLine(list);
+            Console.WriteLine(list.Count);
             */
 
             /*
@@ -165,22 +165,27 @@ namespace CORM
             }).Commit();
             */
 
-            /*
+            
             // 事务操作示例
-            using (var transaction = corm.BeginTransaction())
+            using (CormTransaction transaction = studentTable.BeginTransaction())
             {
                 try
                 {
                     studentTable.Insert()
-                        .Value(new Student() {studentName = "trans1"})
+                        .Value(new Student() {studentName = "oldName"})
                         .Commit(transaction);
-                    var list = studentTable.Find()
+                    list = studentTable.Find()
                         .Where(new Student() {studentName = "oldName"})
                         .Commit(transaction);
                     studentTable.Update()
                         .Where(new Student() {studentName = list[0].studentName})
                         .Value(new Student() {studentName = "newName"})
                         .Commit(transaction);
+                    var sql = @"SELECT * FROM student WHERE studentName_= @studentName_";
+                    var list2 = studentTable.Find()
+                        .Customize(sql,new[] {new SqlParameter("studentName_", "newName"),})
+                        .Commit(transaction);
+                    Console.WriteLine(list2.Count);
                     transaction.Commit();
                 }
                 catch (Exception e)
@@ -189,7 +194,26 @@ namespace CORM
                     transaction.Rollback();
                 }
             }
+            
+            
+            /*
+            using (var trans = studentTable.BeginTransaction())
+            {
+                try
+                {
+                    studentTable.Insert().Value(new Student(){studentName = "nihao5"}).Commit(trans);
+                    studentTable.Insert().Value(new Student(){studentName = "nihao3"}).Commit(trans);
+                    studentTable.Insert().Value(new Student(){studentName = "nihao7"}).Commit(trans);
+                    trans.Commit();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    trans.RollBack();
+                }
+            }
             */
+
         }
     }
 }

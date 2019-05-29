@@ -12,26 +12,25 @@ namespace CORM
      */
     public class Corm
     {
-        public SqlConnection _sqlConnection { get; }
+        public SqlConnection _sqlConnection
+        {
+            get
+            {
+                SqlConnection conn = new SqlConnection(this.ConnectStr);
+                conn.Open();
+                return conn;
+            }
+        }
+
         public string ConnectStr { get; }
         public CormLogUtils LogUtils { get; }
 
         private Corm(string connectionStr, CormLogUtils logUtils)
         {
             this.ConnectStr = connectionStr;
-            this._sqlConnection = new SqlConnection(this.ConnectStr);
-            // 直接打开连接
-            this._sqlConnection.Open();
             this.LogUtils = logUtils;
         }
 
-        
-        // 事务
-        public SqlTransaction BeginTransaction()
-        {
-            return this._sqlConnection.BeginTransaction();
-        }
-        
         // ---------------------------------- Build 模式 --------------------------------------
         public class CormBuilder
         {

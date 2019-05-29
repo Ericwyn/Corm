@@ -43,7 +43,7 @@ namespace CORM
         /*
          * DELETE FROM [dbo].[Product]
          */
-        public int Commit(SqlTransaction transaction)
+        public int Commit(CormTransaction transaction)
         {
             int resDeleteSize = -1;
             sqlBuff += "DELETE FROM " + this.tableName + " ";
@@ -78,7 +78,7 @@ namespace CORM
                 }
             }
             this._cormTable.SqlLog(sqlBuff);            
-            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+            List<SqlParameter> paramList = new List<SqlParameter>(); 
             var properties = typeof(T).GetProperties();
             if (sqlBuff.Contains("WHERE "))
             {
@@ -97,7 +97,7 @@ namespace CORM
                                 var value = property.GetValue(this.whereObj);
                                 var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
                                 param.Value = value;
-                                sqlCommand.Parameters.Add(param);
+                                paramList.Add(param);
                             }
                         }
                     }
@@ -106,9 +106,13 @@ namespace CORM
 
             if (transaction != null)
             {
-                sqlCommand.Transaction = transaction;
+                resDeleteSize = transaction.AddSql(sqlBuff, paramList).ExecuteNonQuery();
             }
-            resDeleteSize = sqlCommand.ExecuteNonQuery();
+            else
+            {
+                SqlCommand sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+                resDeleteSize = sqlCommand.ExecuteNonQuery();
+            }
             if (resDeleteSize < 0)
             {
                 throw new CormException(" DELETE 操作，受影响操作函数 < 0，请检查是否有错误");
