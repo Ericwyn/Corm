@@ -43,6 +43,7 @@
     <Compile Include="corm\Corm.cs" />
     <Compile Include="corm\CormTable.cs" />
     <Compile Include="corm\CormTransaction.cs" />
+    <Compile Include="corm\middle\CormCustomizeMiddleSql.cs" />
     <Compile Include="corm\middle\CormDeleteMiddleSql.cs" />
     <Compile Include="corm\middle\CormInsertMiddleSql.cs" />
     <Compile Include="corm\middle\CormSelectMiddleSql.cs" />

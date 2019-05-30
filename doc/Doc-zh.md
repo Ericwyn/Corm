@@ -121,30 +121,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
  - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 `SqlDataReaderParse<T>.parse()`方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取和解析
     - `CommitForReader()` 方法同样支持事务操作
  
- - 自定义对 SqlDataReader 的解析
-    
-   Corm 可以帮助你把 SqlDataReader 解析成任何类型，只需要使用工具类 SqlDataReaderParse<T> 就好了
-    
-   - T 是临时创建的数据解析结构体，类似于 Entity 类，需要使用 `[Coloum]` 来标记属性，只需要注明其 Name 属性就可以来
-   
-         private class TempStruct
-         {
-             [Column(Name = "name")]
-             public string Name { get; set; }
-             [Column(Name = "age")]
-             public string Age { get; set; }
-         }
-   
-   - T 也可以不使用 `[Colunm]` 来标记，Reader 读取的时候会直接使用该属性的反射得到的 Name,作为 Reader 读取数据的 key
-   
-   - 配置 CommitForReader() 方法使用，示例代码如下
-    
-         var sql = @"SELECT 
-                         studentName_ as name, 
-                         studentAge_ as age 
-                     FROM Student ";
-         SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
-         List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true); 
+
  
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
@@ -209,6 +186,60 @@ Delete 操作可选择删除表中全部数据，或按照特定条件删除
             studentAge = 20, 
         }).Commit();
 
+### 自定义 SQL 语句操作
+
+Corm 支持自定义 SQL 语句操作，使用 Customize() 方法可以创建一个 CormCustomizeMiddleSql 对象，该对象主要有以下方法
+
+ - `SQL()`
+    - 传入原生 SQL 语句和 SqlParameter 列表
+ - `CommitForNone()`
+    - 不要求返回 DataReader 或者 List<T>，适用于 Update、Insert、Delete之外的操作，返回受影响的行数
+ - `CommitForList()`
+    - 返回 List<T>
+ - `CommitForReader()`
+    - 返回 DateReader
+
+Customize() 操作和其他操作一样，也是支持事务的，具体的操作可以看文档后面关于事务的说明
+
+示例代码如下
+
+    // 直接返回 SqlDataReader
+    // 并使用 SqlDataReaderParse 工具解析 reader
+    var sqlTemp1 = @"SELECT 
+                    studentName_ as name, 
+                    studentAge_ as age 
+                FROM Student ";
+    SqlDataReader reader = studentTable.Customize().SQL(sqlTemp1).CommitForReader();
+    List<TempStruct> listTemp = SqlDataReaderParse<TempStruct>.parse(reader, true, true);
+    Console.WriteLine(listTemp.Count);
+
+### 自定义对 SqlDataReader 的解析
+    
+Corm 可以帮助你把 SqlDataReader 解析成任何类型，只需要使用工具类 SqlDataReaderParse<T> 就好了
+    
+ - T 是临时创建的数据解析结构体，类似于 Entity 类，需要使用 `[Coloum]` 来标记属性，只需要注明其 Name 属性就可以来
+
+         private class TempStruct
+         {
+             [Column(Name = "name")]
+             public string Name { get; set; }
+             [Column(Name = "age")]
+             public string Age { get; set; }
+         }
+
+ - T 也可以不使用 `[Colunm]` 来标记，Reader 读取的时候会直接使用该属性的反射得到的 Name,作为 Reader 读取数据的 key
+
+ - 配置自定义SQL语句查询的 CommitForReader() 方法使用，示例代码如下
+
+         var sql = @"SELECT 
+                         studentName_ as name, 
+                         studentAge_ as age 
+                     FROM Student ";
+         SqlDataReader reader = studentTable.Customize().SQL(sql).CommitForReader();
+         List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true); 
+
+
+
 ### 事务的支持
 
 Corm 支持事务
@@ -237,9 +268,9 @@ CormTransaction 缓存一次事务操作中，多个 Sql 操作所共同需要�
                 .Value(new Student() {studentName = "newName"})
                 .Commit(transaction);
             var sql = @"SELECT * FROM student WHERE studentName_= @studentName_";
-            var list2 = studentTable.Find()
-                .Customize(sql,new[] {new SqlParameter("studentName_", "newName"),})
-                .Commit(transaction);
+            var list2 = studentTable.Customize()
+                .SQL(sql,new[] {new SqlParameter("studentName_", "newName"),})
+                .CommitForList(transaction);
             Console.WriteLine(list2.Count);
             transaction.Commit();
         }
@@ -249,4 +280,3 @@ CormTransaction 缓存一次事务操作中，多个 Sql 操作所共同需要�
             transaction.Rollback();
         }
     }
-    

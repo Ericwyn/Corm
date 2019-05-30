@@ -88,7 +88,13 @@ namespace CORM
         {
             return new CormDeleteMiddleSql<T>(this);
         }
-
+        
+        // 自定义 SQL 查询语句操作
+        public CormCustomizeMiddleSql<T> Customize()
+        {
+            return new CormCustomizeMiddleSql<T>(this);
+        }
+        
         public CormTransaction BeginTransaction()
         {
             return new CormTransaction(this._corm);

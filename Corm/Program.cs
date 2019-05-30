@@ -50,7 +50,7 @@ namespace CORM
 
             List<Student> list;
             
-            /*
+            
             // SELECT 查询全部数据
             list = studentTable.Find().Commit();
             Console.WriteLine(list.Count);
@@ -63,8 +63,7 @@ namespace CORM
             list = studentTable.Find().OrderDescBy(new string[] {"studentAge_"}).Commit();
             Console.WriteLine(list.Count);
             
-            
-            
+
             // SELECT 按 where 条件查询
             var st = new Student();
             st.studentAge = 10;
@@ -83,7 +82,6 @@ namespace CORM
             Console.WriteLine(list.Count);
             
 
-            
             // SELECT Like 查询
             // 将会得到 
             //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
@@ -93,20 +91,20 @@ namespace CORM
                 .WhereLike("studentAge_", "2")
                 .Commit();
             Console.WriteLine(list.Count);
-            */
+            
 
 
-            /*
+            
             // 直接返回 SqlDataReader
             // 并使用 SqlDataReaderParse 工具解析 reader
-            var sql = @"SELECT 
+            var sqlTemp1 = @"SELECT 
                             studentName_ as name, 
                             studentAge_ as age 
                         FROM Student ";
-            SqlDataReader reader = studentTable.Find().Customize(sql).CommitForReader();
+            SqlDataReader reader = studentTable.Customize().SQL(sqlTemp1).CommitForReader();
             List<TempStruct> listTemp = SqlDataReaderParse<TempStruct>.parse(reader, true, true);
             Console.WriteLine(listTemp.Count);
-            */
+            
 
             /*
             // SELECT 自定义查询语句
@@ -182,9 +180,9 @@ namespace CORM
                         .Value(new Student() {studentName = "newName"})
                         .Commit(transaction);
                     var sql = @"SELECT * FROM student WHERE studentName_= @studentName_";
-                    var list2 = studentTable.Find()
-                        .Customize(sql,new[] {new SqlParameter("studentName_", "newName"),})
-                        .Commit(transaction);
+                    var list2 = studentTable.Customize()
+                        .SQL(sql,new[] {new SqlParameter("studentName_", "newName"),})
+                        .CommitForList(transaction);
                     Console.WriteLine(list2.Count);
                     transaction.Commit();
                 }
