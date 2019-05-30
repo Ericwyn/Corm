@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using CORM.attrs;
 using CORM.utils;
@@ -17,15 +18,9 @@ namespace CORM
         // 缓存该类型的列名，避免经常反射
         private List<string> columnNameTemp;
         
-        
-        //private string whereTemp = "";
-        private T whereObj;
+                private T whereObj;
         // 查找的属性
         private string attributes = "*";
-        // 自定义的 Sql 查询语句
-//        private SqlCommand customizeSqlCommand;
-        private string customizeSqlBuff = "";
-        private List<SqlParameter> customizeSqlParamList;
 
         // Top 数量
         private int topNum = -1;
@@ -42,15 +37,7 @@ namespace CORM
             this.tableName = _cormTable._tableName;
             this.columnNameTemp = cormTable.ColumnNameTemp;
         }
-        
-//        // API 命名易混淆，删除
-//        // 查询全部
-//        public CormSelectMiddleSql<T> All()
-//        {
-//            this.attributes = "*";
-//            return this;
-//        }
-//        
+
         // 查询几个属性
         public CormSelectMiddleSql<T> Attributes(string[] columnNames)
         {
@@ -124,37 +111,9 @@ namespace CORM
         
         public SqlDataReader CommitForReader(CormTransaction transaction)
         {
-            if (!customizeSqlBuff.Equals("") && 
-                (!attributes.Equals("*") || whereObj != null))
-            {
-                throw new CormException("SELECT 错误，Customize() 方法与其他查询方法冲突，请检查");
-            }
 
             SqlDataReader reader;
             SqlCommand sqlCommand;
-            if (!customizeSqlBuff.Equals(""))
-            {
-                if (transaction != null)
-                {
-                    reader = transaction.AddSql(customizeSqlBuff, customizeSqlParamList).ExecuteReader();
-                }
-                else
-                {
-                    using (SqlConnection conn = this._cormTable._corm.NewConnection())
-                    {
-                        sqlCommand = new SqlCommand(customizeSqlBuff, conn);
-                        if (customizeSqlParamList != null && customizeSqlParamList.Count > 0)
-                        {
-                            foreach (SqlParameter param in customizeSqlParamList)
-                            {
-                                sqlCommand.Parameters.Add(param);
-                            }
-                        }
-                        reader = sqlCommand.ExecuteReader();
-                    }
-                }
-                return reader;
-            }
 
             // 拼接 TOP 语句
             var topQuery = "";
@@ -183,8 +142,6 @@ namespace CORM
             sqlBuff += GetOrderQuery(this.orderByAttributes, this.orderDescByAttributes);
             // 拼接 ";"
             sqlBuff += ";";
-//            var sqlCommend = new SqlCommand(sqlBuff, _cormTable._corm._sqlConnection);
-//            if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals("")) sqlCommend.Parameters.Add(GetWhereLikeParam(likeQueryList));
             List<SqlParameter> paramList = new List<SqlParameter>();
             if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
             {
@@ -223,50 +180,19 @@ namespace CORM
             if (transaction != null)
             {
                 reader = transaction.AddSql(sqlBuff, paramList).ExecuteReader();
-//                sqlCommend.Transaction = transaction;
             }
             else
             {
-                using (SqlConnection conn = this._cormTable._corm.NewConnection())
+                sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm.NewConnection());
+                foreach (SqlParameter param in paramList)
                 {
-                    sqlCommand = new SqlCommand(sqlBuff, conn);
-                    foreach (SqlParameter param in paramList)
-                    {
-                        sqlCommand.Parameters.Add(param);
-                    }
-                    reader = sqlCommand.ExecuteReader();
+                    sqlCommand.Parameters.Add(param);
                 }
+                reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
             }
             return reader;
         }
         
-        // 使用自定义的 Sql 语句进行查询
-        public CormSelectMiddleSql<T> Customize(string sqlStr)
-        {
-            return Customize(sqlStr, null);
-        }
-
-        public CormSelectMiddleSql<T> Customize(string sqlStr, SqlParameter[] parameters)
-        {
-            if (sqlStr == null || sqlStr.Trim().Equals(""))
-            {
-                throw new Exception("SELECT 使用 Customize() 方法进行自定义查询的时候，传入的 Sql 语句有误");
-            }
-            this.customizeSqlBuff = sqlStr;
-            if (parameters != null)
-            {
-                if (this.customizeSqlParamList == null)
-                {
-                    this.customizeSqlParamList = new List<SqlParameter>();
-                }
-                foreach (SqlParameter parameter in parameters)
-                {
-                    this.customizeSqlParamList.Add(parameter);
-                }
-            }
-            
-            return this;
-        }
         
         // 得到 Sort 语句
         private static string GetOrderQuery(string[] orderByList, string[] orderDescByList)
