@@ -110,12 +110,15 @@ namespace CORM
             }
             else
             {
-                SqlCommand sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
-                foreach (SqlParameter param in paramList)
+                using (SqlConnection conn = this._cormTable._corm.NewConnection())
                 {
-                    sqlCommand.Parameters.Add(param);
+                    SqlCommand sqlCommand = new SqlCommand(sqlBuff, conn);
+                    foreach (SqlParameter param in paramList)
+                    {
+                        sqlCommand.Parameters.Add(param);
+                    }
+                    resDeleteSize = sqlCommand.ExecuteNonQuery();
                 }
-                resDeleteSize = sqlCommand.ExecuteNonQuery();
             }
             if (resDeleteSize < 0)
             {

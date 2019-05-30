@@ -140,15 +140,18 @@ namespace CORM
                 }
                 else
                 {
-                    sqlCommand = new SqlCommand(customizeSqlBuff, this._cormTable._corm._sqlConnection);
-                    if (customizeSqlParamList != null && customizeSqlParamList.Count > 0)
+                    using (SqlConnection conn = this._cormTable._corm.NewConnection())
                     {
-                        foreach (SqlParameter param in customizeSqlParamList)
+                        sqlCommand = new SqlCommand(customizeSqlBuff, conn);
+                        if (customizeSqlParamList != null && customizeSqlParamList.Count > 0)
                         {
-                            sqlCommand.Parameters.Add(param);
+                            foreach (SqlParameter param in customizeSqlParamList)
+                            {
+                                sqlCommand.Parameters.Add(param);
+                            }
                         }
+                        reader = sqlCommand.ExecuteReader();
                     }
-                    reader = sqlCommand.ExecuteReader();
                 }
                 return reader;
             }
@@ -224,12 +227,15 @@ namespace CORM
             }
             else
             {
-                sqlCommand = new SqlCommand(sqlBuff, _cormTable._corm._sqlConnection);
-                foreach (SqlParameter param in paramList)
+                using (SqlConnection conn = this._cormTable._corm.NewConnection())
                 {
-                    sqlCommand.Parameters.Add(param);
+                    sqlCommand = new SqlCommand(sqlBuff, conn);
+                    foreach (SqlParameter param in paramList)
+                    {
+                        sqlCommand.Parameters.Add(param);
+                    }
+                    reader = sqlCommand.ExecuteReader();
                 }
-                reader = sqlCommand.ExecuteReader();
             }
             return reader;
         }

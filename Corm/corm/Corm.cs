@@ -12,15 +12,6 @@ namespace CORM
      */
     public class Corm
     {
-        public SqlConnection _sqlConnection
-        {
-            get
-            {
-                SqlConnection conn = new SqlConnection(this.ConnectStr);
-                conn.Open();
-                return conn;
-            }
-        }
 
         public string ConnectStr { get; }
         public CormLogUtils LogUtils { get; }
@@ -30,7 +21,14 @@ namespace CORM
             this.ConnectStr = connectionStr;
             this.LogUtils = logUtils;
         }
-
+        
+        public SqlConnection NewConnection()
+        {
+            SqlConnection conn = new SqlConnection();
+            conn.Open();
+            return conn;
+        }
+        
         // ---------------------------------- Build 模式 --------------------------------------
         public class CormBuilder
         {

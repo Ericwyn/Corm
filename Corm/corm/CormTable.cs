@@ -93,11 +93,6 @@ namespace CORM
         {
             return new CormTransaction(this._corm);
         }
-        
-        public SqlCommand SqlCommand(string sql)
-        {
-            return new SqlCommand(sql, this._corm._sqlConnection);
-        }
 
         public void SqlLog(string sql)
         {

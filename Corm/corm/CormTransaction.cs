@@ -52,7 +52,7 @@ namespace CORM
         public CormTransaction(Corm corm)
         {
             this.transSql = new List<CormTransSql>();
-            this._sqlConnection = corm._sqlConnection;
+            this._sqlConnection = corm.NewConnection();
             this._transaction = this._sqlConnection.BeginTransaction();
         }
 

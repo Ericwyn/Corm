@@ -152,14 +152,17 @@ namespace CORM
             }
             else
             {
-                var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
-                foreach (SqlParameter param in paramList)
+                using (SqlConnection conn = this._cormTable._corm.NewConnection())
                 {
-                    sqlCommand.Parameters.Add(param);
-                }
-                if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
-                {
-                    throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
+                    var sqlCommand = new SqlCommand(sqlBuff, conn);
+                    foreach (SqlParameter param in paramList)
+                    {
+                        sqlCommand.Parameters.Add(param);
+                    }
+                    if ((resColSize = sqlCommand.ExecuteNonQuery()) < 0)
+                    {
+                        throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
+                    }
                 }
                 return resColSize;
             }
