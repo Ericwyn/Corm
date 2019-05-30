@@ -15,28 +15,71 @@
 	 - MiddleSql 类会将查询到的数据再自动封装成 List<T> 返回 
 
 # 功能列表
- - 查找 Select
-	 - Where 条件
-		- 字符串 Like 条件
-	 - 只查找部分字段
-	 - 将返回结果的自动封装成 List<T>
-	 - 手写 Sql 语句进行查询(同样支持事务)
-	 - 只查询 Top n 条
-	 - Order By ASC | DESC 排序
-     - ~~分页 查询~~
-     - ~~Join 查询~~
- - 添加 Insert
-	 - 添加单条数据
-	 - 添加多条数据
- - 更新 Update
-	 - Where 设定更新过滤
-	 - Value 设定替换的新内容
- - 删除 Delete
-     - 删除全部
-	 - 按特定条件删除
- - 支持事务
- - ~~启动时候对 Entity 结构进行判断~~
- - 自动解析 SqlDataReader
+## 核心功能
+ - Find()
+    
+    查询操作
+    
+    - Attributes(string[] colunmNames)
+      - 只查询特定字段
+    - Where(T whereObj)
+      - Where 条件查询
+    - WhereLike(string colunmnName, string likeQuery)
+      - Like 条件查询
+    - OrderBy(string[] atts)
+    - OrderDescBy(string[] atts)
+      - Order By 条件设置, 多个条件使用 and 连接
+    - Top(int num)
+      - 只查询 Top N 条
+    - Commit(CormTransaction trans = null)
+    - CommitForOne(CormTransaction trans = null)
+    - CommitForReader(CormTransaction trans = null)
+      - Sql操作提交，提供不同的放回
+ 
+ - Insert()
+ 
+    插入操作
+ 
+   - Value(T entity)
+   - Value(List<T> entityList)
+   - Commit()
+   - Commit(CormTransaction trans)
+ 
+ - Update()
+ 
+    更新操作
+ 
+   - Where(T whereObj)
+   - Value(T obj)
+   - Commit()
+   - Commit(CormTransaction trans)
+
+ - Delete()
+ 
+    删除操作
+    
+   - Where(T whereObj)
+   - All()
+   - Commit()
+   - Commit(CormTransaction trans)
+
+ - Customize()
+ 
+    自定义SQL操作
+    
+   - SQL(string sql)
+   - SQL(string sql, List<SqlParameter> paramList)
+   - CommitForNone()
+   - CommitForList()
+   - CommitForReader()
+   - CommitForNone(CormTransaction trans)
+   - CommitForList(CormTransaction trans)
+   - CommitForReader(CormTransaction trans)
+
+## 其他功能
+ - 事务操作
+ - SqlDataReaderParse<T>
+    - SqlDataReader 解析工具
     - 支持自定义解析类型
  - 自定义 Sql 和日志打印的回调
  - Build模式，初始化和创建
