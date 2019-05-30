@@ -24,7 +24,7 @@ namespace CORM
         
         public SqlConnection NewConnection()
         {
-            SqlConnection conn = new SqlConnection();
+            SqlConnection conn = new SqlConnection(this.ConnectStr);
             conn.Open();
             return conn;
         }
