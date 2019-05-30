@@ -69,6 +69,12 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
         List<Student> list = studentTable.Find().Top(1).Commit();
  
+ - 查询首条数据
+ 
+    因为比较常用所以单独变成一个方法，就是对 Top(1) 和 Commit() 方法的封装
+    
+        Student = studentTable.Find().CommitForOne();
+ 
  - Order By ASC | DESC 排序
  
         // Order By ASC 排序

@@ -103,6 +103,26 @@ namespace CORM
             var resList = SqlDataReaderParse<T>.parse(reader, true);
             return resList;
         }
+
+        public T CommitForOne()
+        {
+            return CommitForOne(null);
+        }
+        
+        public T CommitForOne(CormTransaction transaction)
+        {
+            // 只查找一个
+            this.Top(1);
+            List<T> temp = Commit(transaction);
+            if (temp.Count != 1)
+            {
+                return default(T);
+            }
+            else
+            {
+                return temp[0];
+            }
+        }
         
         public SqlDataReader CommitForReader()
         {
