@@ -135,6 +135,7 @@ namespace CORM
             }
             var resWhereQuery = new StringBuilder("");
             var properties = typeof(T).GetProperties();
+            bool flag = false;
             for (int i = 0; i < properties.Length; i++)
             {
                 var value = properties[i].GetValue(obj);
@@ -148,14 +149,15 @@ namespace CORM
                         Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
+                            if (flag)
+                            {
+                                resWhereQuery.Append(" AND");
+                            }
                             resWhereQuery.Append(" ");
                             resWhereQuery.Append(attr.Name);
                             resWhereQuery.Append("=@");
                             resWhereQuery.Append(attr.Name);
-                        }
-                        if (i != properties.Length - 1)
-                        {
-                            resWhereQuery.Append(" AND");
+                            flag = true;
                         }
                     }
                 }
