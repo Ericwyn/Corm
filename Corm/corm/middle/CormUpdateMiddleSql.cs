@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Text;
 using CORM.attrs;
 using CORM.utils;
 
@@ -16,7 +17,7 @@ namespace CORM
     public class CormUpdateMiddleSql<T> where T : new()
     {
         private CormTable<T> _cormTable;
-        private string sqlBuff;
+        private StringBuilder sqlBuilder = new StringBuilder("");
         private string tableName;
         // 缓存该类型的列名，避免经常反射
         private List<string> columnNameTemp;
@@ -63,12 +64,16 @@ namespace CORM
             {
                 throw new Exception("WHERE 条件或 SET 条件为空");
             }
-            
-            sqlBuff = "UPDATE " + this.tableName + " "+
-                      "\n" 
-                      + GetValueQuery(updateObj) + " " + GetWhereQuery(whereObj) +" ;";
-            
-//            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
+            // "UPDATE " + this.tableName + " "+"\n" + GetValueQuery(updateObj) + " " + GetWhereQuery(whereObj) +" ;"
+            sqlBuilder.Append("UPDATE ");
+            sqlBuilder.Append(this.tableName);
+            sqlBuilder.Append(" \n");
+            sqlBuilder.Append(GetValueQuery(updateObj));
+            sqlBuilder.Append(" ");
+            sqlBuilder.Append(GetWhereQuery(whereObj));
+            sqlBuilder.Append(" ;");
+
+            var sql = sqlBuilder.ToString();
             List<SqlParameter> paramList = new List<SqlParameter>(); 
             var properties = typeof(T).GetProperties();
             foreach (var property in properties)
@@ -82,7 +87,7 @@ namespace CORM
                     {
                         continue;
                     }
-                    if (sqlBuff.Contains(attr.Name + flagForOldValue))
+                    if (sql.Contains(attr.Name + flagForOldValue))
                     {
                         var param = new SqlParameter();
                         // 创建 param 以填充 sqlBuff 当中的占位符
@@ -100,7 +105,7 @@ namespace CORM
                         paramList.Add(param);
                     }
 
-                    if (sqlBuff.Contains(attr.Name + flagForValueQuery))
+                    if (sql.Contains(attr.Name + flagForValueQuery))
                     {
                         var param = new SqlParameter();
                         // 创建 param 以填充 sqlBuff 当中的占位符
@@ -120,16 +125,16 @@ namespace CORM
                 }
             }
             
-            this._cormTable.SqlLog(sqlBuff);
+            this._cormTable.SqlLog(sql);
             if (transaction != null)
             {
-                resUpdateSize = transaction.AddSql(sqlBuff, paramList).ExecuteNonQuery();
+                resUpdateSize = transaction.AddSql(sql, paramList).ExecuteNonQuery();
             }
             else
             {
                 using (SqlConnection conn = this._cormTable._corm.NewConnection())
                 {
-                    var sqlCommand = new SqlCommand(sqlBuff, conn);
+                    var sqlCommand = new SqlCommand(sql, conn);
                     foreach (SqlParameter param in paramList)
                     {
                         sqlCommand.Parameters.Add(param);

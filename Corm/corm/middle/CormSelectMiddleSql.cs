@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
+using System.Text;
 using CORM.attrs;
 using CORM.utils;
 
@@ -14,7 +15,7 @@ namespace CORM
     public class CormSelectMiddleSql<T> where T : new()
     {
         private CormTable<T> _cormTable;
-        private string sqlBuff;
+        private StringBuilder sqlBuilder = new StringBuilder("");
         private string tableName;
         // 缓存该类型的列名，避免经常反射
         private Dictionary<string, PropertyInfo> PropertyMap;
@@ -142,27 +143,41 @@ namespace CORM
             {
                 topQuery = " TOP(" + topNum + ") ";
             }
+            
+            // "SELECT " + topQuery + attributes + " FROM " + this.tableName +" "
+            sqlBuilder.Append("SELECT ");
+            sqlBuilder.Append(topQuery);
+            sqlBuilder.Append(attributes);
+            sqlBuilder.Append(" FROM ");
+            sqlBuilder.Append(this.tableName);
+            sqlBuilder.Append(" ");
 
-            sqlBuff = "SELECT " + topQuery + attributes + " FROM " + this.tableName +" ";
             // 拼接 Where 语句
-            sqlBuff = sqlBuff + "\n" + GetWhereQuery(this.whereObj) + " ";
+            // "\n" + GetWhereQuery(this.whereObj) + " "
+            sqlBuilder.Append("\n");
+            sqlBuilder.Append(GetWhereQuery(this.whereObj));
+            sqlBuilder.Append(" ");
+
             // 拼接 LIKE 字符串语句
             var whereLikeQUery = GetWhereLikeQuery(this.likeQueryList);
             if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
             {
-                if (sqlBuff.Contains("WHERE"))
+                if (sqlBuilder.ToString().Contains("WHERE"))
                 {
-                    sqlBuff = sqlBuff + " AND " + whereLikeQUery;
+                    sqlBuilder.Append(" AND ");
+                    sqlBuilder.Append(whereLikeQUery);
                 }
                 else
                 {
-                    sqlBuff = sqlBuff + " WHERE " + whereLikeQUery;
+                    sqlBuilder.Append(" WHERE ");
+                    sqlBuilder.Append(whereLikeQUery);
                 }
 
             }
-            sqlBuff += GetOrderQuery(this.orderByAttributes, this.orderDescByAttributes);
+            
+            sqlBuilder.Append(GetOrderQuery(this.orderByAttributes, this.orderDescByAttributes));
             // 拼接 ";"
-            sqlBuff += ";";
+            sqlBuilder.Append(";");
             List<SqlParameter> paramList = new List<SqlParameter>();
             if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
             {
@@ -171,13 +186,13 @@ namespace CORM
                     paramList.Add(parameter);
                 }
             }
-            var properties = typeof(T).GetProperties();
 
-            if (sqlBuff.Contains("WHERE "))
+            var sql = sqlBuilder.ToString();
+            if (sql.Contains("WHERE "))
             {
                 foreach (string key in PropertyMap.Keys)
                 {
-                    if (sqlBuff.Contains("@"+key))
+                    if (sql.Contains("@"+key))
                     {
                         // 证明预编译语句里面有这个属性
                         var value = PropertyMap[key].GetValue(this.whereObj);
@@ -188,14 +203,14 @@ namespace CORM
                     }
                 }
             }
-            this._cormTable.SqlLog(sqlBuff);
+            this._cormTable.SqlLog(sql);
             if (transaction != null)
             {
-                reader = transaction.AddSql(sqlBuff, paramList).ExecuteReader();
+                reader = transaction.AddSql(sql, paramList).ExecuteReader();
             }
             else
             {
-                sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm.NewConnection());
+                sqlCommand = new SqlCommand(sql, this._cormTable._corm.NewConnection());
                 foreach (SqlParameter param in paramList)
                 {
                     sqlCommand.Parameters.Add(param);
@@ -209,23 +224,40 @@ namespace CORM
         // 得到 Sort 语句
         private static string GetOrderQuery(string[] orderByList, string[] orderDescByList)
         {
-            var resOrderQuery = "";
+            var resOrderQuery = new StringBuilder("");
             if ((orderByList == null || orderByList.Length == 0) && (orderDescByList == null || orderDescByList.Length == 0))
             {
-                return resOrderQuery;
+                return "";
             }
 
-            resOrderQuery = " ORDER BY ";
-            foreach (var att in orderByList)
+            resOrderQuery.Append(" ORDER BY ");
+            for (int i = 0; i < orderByList.Length ; i++)
             {
-                resOrderQuery += att + " ASC, ";
+                resOrderQuery.Append(orderByList[i]);
+                resOrderQuery.Append(" ASC");
+                if ( i != orderByList.Length - 1)
+                {
+                    resOrderQuery.Append(", ");
+                }
             }
-            foreach (var att in orderDescByList)
+
+            for (int i = 0; i < orderDescByList.Length; i++)
             {
-                resOrderQuery += att + " DESC, ";
+                if (i == 0)
+                {
+                    if (resOrderQuery.ToString().Contains("ASC"))
+                    {
+                        resOrderQuery.Append(", ");
+                    }
+                }
+                resOrderQuery.Append(orderDescByList[i]);
+                resOrderQuery.Append(" DESC");
+                if (i != orderDescByList.Length - 1)
+                {
+                    resOrderQuery.Append(", ");
+                }
             }
-            resOrderQuery = resOrderQuery.Substring(0, resOrderQuery.Length - 2);
-            return resOrderQuery;
+            return resOrderQuery.ToString();
         }
         
         // 得到 where 语句
@@ -234,7 +266,7 @@ namespace CORM
             if (obj == null){
                 return "";
             }
-            var resWhereQuery = "";
+            var resWhereQuery = new StringBuilder("");
             var properties = typeof(T).GetProperties();
             foreach (var property in properties)
             {
@@ -249,16 +281,23 @@ namespace CORM
                         Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
-                            resWhereQuery += " " + attr.Name + "=@" + attr.Name + " and";
+                            // " " + attr.Name + "=@" + attr.Name + " and"
+                            resWhereQuery.Append(" ");
+                            resWhereQuery.Append(attr.Name);
+                            resWhereQuery.Append("=@");
+                            resWhereQuery.Append(attr.Name);
+                            resWhereQuery.Append(" AND");
                         }
                     }
                 }
             }
-            if (resWhereQuery.EndsWith("and"))
+
+            var temp = resWhereQuery.ToString();
+            if (temp.EndsWith("AND"))
             {
-                resWhereQuery = "WHERE "+resWhereQuery.Substring(0, resWhereQuery.Length - 3);
+                return "WHERE "+temp.Substring(0, temp.Length - 3);
             }
-            return resWhereQuery;
+            return "";
         }
         
         /*
@@ -269,17 +308,20 @@ namespace CORM
             if (list == null){
                 return "";
             }
-            var resWhereQuery = "";
+            var resWhereQuery = new StringBuilder("");
             
             for (int i = 0; i < list.Count; i++)
             {
-                resWhereQuery += list[i].column + " LIKE @WHERE_LIKE_PARAM_" + i + " AND ";
+                
+                resWhereQuery.Append(list[i].column);
+                resWhereQuery.Append(" LIKE @WHERE_LIKE_PARAM_");
+                resWhereQuery.Append(i);
+                if (i != list.Count - 1)
+                {
+                    resWhereQuery.Append(" AND ");
+                }
             }
-            if (resWhereQuery.Length > 4)
-            {
-                resWhereQuery = resWhereQuery.Substring(0, resWhereQuery.Length - 4);
-            }
-            return resWhereQuery;
+            return resWhereQuery.ToString();
         }
         
         /*

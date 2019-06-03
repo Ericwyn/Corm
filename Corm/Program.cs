@@ -50,7 +50,7 @@ namespace CORM
 
             List<Student> list;
             
-            
+            /*
             // SELECT 查询全部数据
             list = studentTable.Find().Commit();
             Console.WriteLine(list.Count);
@@ -92,9 +92,6 @@ namespace CORM
                 .Commit();
             Console.WriteLine(list.Count);
             
-
-
-            
             // 直接返回 SqlDataReader
             // 并使用 SqlDataReaderParse 工具解析 reader
             var sqlTemp1 = @"SELECT 
@@ -106,7 +103,7 @@ namespace CORM
             Console.WriteLine(listTemp.Count);
             
 
-            /*
+            
             // SELECT 自定义查询语句
             list = studentTable.Find().Customize(
                 "SELECT * FROM Student WHERE studentName_=@studentName_",
@@ -151,19 +148,19 @@ namespace CORM
             .Commit();
             */
 
-            /*
+            
             // Delete 删除操作
             // 删除该表全部数据
-            studentTable.Delete().All().Commit();
+//            studentTable.Delete().All().Commit();
             // 删除所有 studentName 为 "testtest" , studentAge 为 20 的行
             studentTable.Delete().Where(new Student()
             {
                 studentName = "testtest", 
                 studentAge = 20, 
             }).Commit();
-            */
-
             
+
+            /*
             // 事务操作示例
             using (CormTransaction transaction = studentTable.BeginTransaction())
             {
@@ -190,24 +187,6 @@ namespace CORM
                 {
                     Console.WriteLine("发生异常：" + e.Message + " ，插入失败，事务回滚");
                     transaction.Rollback();
-                }
-            }
-            
-            
-            /*
-            using (var trans = studentTable.BeginTransaction())
-            {
-                try
-                {
-                    studentTable.Insert().Value(new Student(){studentName = "nihao5"}).Commit(trans);
-                    studentTable.Insert().Value(new Student(){studentName = "nihao3"}).Commit(trans);
-                    studentTable.Insert().Value(new Student(){studentName = "nihao7"}).Commit(trans);
-                    trans.Commit();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    trans.RollBack();
                 }
             }
             */

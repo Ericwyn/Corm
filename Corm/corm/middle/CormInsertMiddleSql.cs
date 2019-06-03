@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
+using System.Text;
 using CORM.attrs;
 using CORM.utils;
 
@@ -13,7 +14,7 @@ namespace CORM
     public class CormInsertMiddleSql<T> where T : new ()
     {
         private CormTable<T> _cormTable;
-        private string sqlBuff;
+        private StringBuilder sqlBuilder = new StringBuilder("");
         private string tableName;
         // 缓存 Property
         private Dictionary<string, PropertyInfo> PropertyMap;
@@ -83,30 +84,44 @@ namespace CORM
                 insertTempList.Add(insertTemp);
             }
             
-            sqlBuff = "INSERT INTO " + this.tableName + "(";
-            foreach (var columnName in columnNameArrary)
+            sqlBuilder.Append("INSERT INTO ");
+            sqlBuilder.Append(this.tableName);
+            sqlBuilder.Append("(");
+
+            for (int i = 0; i < columnNameArrary.Length; i++)
             {
-                sqlBuff += columnName + ",";
+                sqlBuilder.Append(columnNameArrary[i]);
+                if (i != columnNameArrary.Length - 1)
+                {
+                    sqlBuilder.Append(",");
+                }
             }
-            sqlBuff = sqlBuff.Substring(0, sqlBuff.Length - 1);
-            sqlBuff += ") VALUES ";
+            sqlBuilder.Append(") VALUES ");
             // 开始拼接字符串
             for (var i = 0; i < insertTempList.Count; i++)
             {
-                sqlBuff += "\n(";
-                foreach (var colunmName in columnNameArrary)
+                sqlBuilder.Append("\n(");
+                for (int j = 0; j < columnNameArrary.Length; j++)
                 {
-                    sqlBuff += "@" + colunmName + flagForListItem + i +",";
+                    sqlBuilder.Append("@");
+                    sqlBuilder.Append(columnNameArrary[j]);
+                    sqlBuilder.Append(flagForListItem);
+                    sqlBuilder.Append(i);
+                    if (j != columnNameArrary.Length - 1)
+                    {
+                        sqlBuilder.Append(",");
+                    }
                 }
 
-                sqlBuff = sqlBuff.Substring(0, sqlBuff.Length - 1);
-                sqlBuff += "),";
+                sqlBuilder.Append(")");
+                if (i != insertTempList.Count - 1)
+                {
+                    sqlBuilder.Append(",");
+                }
             }
 
-            sqlBuff = sqlBuff.Substring(0, sqlBuff.Length - 1);
-            sqlBuff += ";";
+            sqlBuilder.Append(";");
 
-            
             // 开始执行事务
 //            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
             List<SqlParameter> paramList = new List<SqlParameter>(); 
@@ -144,14 +159,15 @@ namespace CORM
                 }
             }
 
-            this._cormTable.SqlLog(sqlBuff);
+            var sql = sqlBuilder.ToString();
+            this._cormTable.SqlLog(sql);
             int resColSize = -1;
             if (transaction != null)
             {
                 // 如果是有事务操作的话，就把需要执行的语句保存到 CormTransaction 里面
                 // 使用 Trans里面共同的 Connection
                 // 和其他事务一起调用和返回
-                resColSize = transaction.AddSql(sqlBuff, paramList).ExecuteNonQuery();
+                resColSize = transaction.AddSql(sql, paramList).ExecuteNonQuery();
                 if (resColSize < 0)
                 {
                     throw new CormException(" INSERT 操作，受影响操作函数 < 0，请检查是否有错误");
@@ -162,7 +178,7 @@ namespace CORM
             {
                 using (SqlConnection conn = this._cormTable._corm.NewConnection())
                 {
-                    var sqlCommand = new SqlCommand(sqlBuff, conn);
+                    var sqlCommand = new SqlCommand(sql, conn);
                     foreach (SqlParameter param in paramList)
                     {
                         sqlCommand.Parameters.Add(param);

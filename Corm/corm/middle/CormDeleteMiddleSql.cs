@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
+using System.Text;
 using CORM.attrs;
 using CORM.utils;
 
@@ -9,7 +10,7 @@ namespace CORM
     public class CormDeleteMiddleSql<T> where T : new()
     {
         private CormTable<T> _cormTable;
-        private string sqlBuff;
+        private StringBuilder sqlBuilder = new StringBuilder("");
         private string tableName;
         // 缓存该类型的列名，避免经常反射
         private Dictionary<string, PropertyInfo> PropertyMap;
@@ -47,7 +48,10 @@ namespace CORM
         public int Commit(CormTransaction transaction)
         {
             int resDeleteSize = -1;
-            sqlBuff += "DELETE FROM " + this.tableName + " ";
+            sqlBuilder.Append("DELETE FROM ");
+            sqlBuilder.Append(this.tableName);
+            sqlBuilder.Append(" ");
+
             // 既没有使用 All() 方法也没有使用 Where() 方法，抛出异常提示用户
             if (whereObj == null && !deleteAllFlag)
             {
@@ -58,7 +62,7 @@ namespace CORM
                 if (whereObj == null && deleteAllFlag)
                 {
                     // All 条件
-                    sqlBuff = sqlBuff + ";";
+                    sqlBuilder.Append(";");
                 }
                 else if (whereObj != null && !deleteAllFlag)
                 {
@@ -70,7 +74,8 @@ namespace CORM
                     }
                     else
                     {
-                        sqlBuff = sqlBuff + whereQuery;
+                        sqlBuilder.Append(whereQuery);
+                        sqlBuilder.Append(";");
                     }
                 }
                 else
@@ -78,14 +83,16 @@ namespace CORM
                     throw new CormException("DELETE 时候 All() 和 Where() 不能同时使用");
                 }
             }
-            this._cormTable.SqlLog(sqlBuff);            
+            
+            var sql = sqlBuilder.ToString();
+            this._cormTable.SqlLog(sql);            
             List<SqlParameter> paramList = new List<SqlParameter>(); 
             var properties = typeof(T).GetProperties();
-            if (sqlBuff.Contains("WHERE "))
+            if (sql.Contains("WHERE "))
             {
                 foreach (string key in PropertyMap.Keys)
                 {
-                    if (sqlBuff.Contains("@"+key))
+                    if (sql.Contains("@"+key))
                     {
                         // 证明预编译语句里面有这个属性
                         var value = PropertyMap[key].GetValue(this.whereObj);
@@ -99,13 +106,13 @@ namespace CORM
 
             if (transaction != null)
             {
-                resDeleteSize = transaction.AddSql(sqlBuff, paramList).ExecuteNonQuery();
+                resDeleteSize = transaction.AddSql(sql, paramList).ExecuteNonQuery();
             }
             else
             {
                 using (SqlConnection conn = this._cormTable._corm.NewConnection())
                 {
-                    SqlCommand sqlCommand = new SqlCommand(sqlBuff, conn);
+                    SqlCommand sqlCommand = new SqlCommand(sql, conn);
                     foreach (SqlParameter param in paramList)
                     {
                         sqlCommand.Parameters.Add(param);
@@ -126,31 +133,43 @@ namespace CORM
             if (obj == null){
                 return "";
             }
-            var resWhereQuery = "";
+            var resWhereQuery = new StringBuilder("");
             var properties = typeof(T).GetProperties();
-            foreach (var property in properties)
+            for (int i = 0; i < properties.Length; i++)
             {
-                var value = property.GetValue(obj);
+                var value = properties[i].GetValue(obj);
                 // 如果这个属性存在的话
                 if (value != null)
                 {
                     // 从注解厘米拿到具体的字段名称，拼接
-                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
+                    var objAttrs = properties[i].GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
                         Column attr = objAttrs[0] as Column;
                         if (attr != null)
                         {
-                            resWhereQuery += " " + attr.Name + "=@" + attr.Name + " and";
+                            resWhereQuery.Append(" ");
+                            resWhereQuery.Append(attr.Name);
+                            resWhereQuery.Append("=@");
+                            resWhereQuery.Append(attr.Name);
+                        }
+                        if (i != properties.Length - 1)
+                        {
+                            resWhereQuery.Append(" AND");
                         }
                     }
                 }
             }
-            if (resWhereQuery.EndsWith("and"))
+
+            var temp = resWhereQuery.ToString();
+            if (temp.Contains("=@"))
             {
-                resWhereQuery = "WHERE "+resWhereQuery.Substring(0, resWhereQuery.Length - 3);
+                return "WHERE " + temp;
             }
-            return resWhereQuery;
+            else
+            {
+                return "";
+            }
         }
     }
 }
