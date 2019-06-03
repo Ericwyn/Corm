@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Reflection;
 using CORM.attrs;
 using CORM.utils;
 
@@ -16,7 +17,7 @@ namespace CORM
         private string sqlBuff;
         private string tableName;
         // 缓存该类型的列名，避免经常反射
-        private List<string> columnNameTemp;
+        private Dictionary<string, PropertyInfo> PropertyMap;
         
                 private T whereObj;
         // 查找的属性
@@ -35,7 +36,7 @@ namespace CORM
         {
             this._cormTable = cormTable;
             this.tableName = _cormTable._tableName;
-            this.columnNameTemp = cormTable.ColumnNameTemp;
+            this.PropertyMap = cormTable.PropertyMap;
         }
 
         // 查询几个属性
@@ -174,25 +175,16 @@ namespace CORM
 
             if (sqlBuff.Contains("WHERE "))
             {
-                // 有 Where 的话就要放入值
-                foreach (var property in properties)
+                foreach (string key in PropertyMap.Keys)
                 {
-                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
-                    if (objAttrs.Length > 0)
+                    if (sqlBuff.Contains("@"+key))
                     {
-                        Column attr = objAttrs[0] as Column;
-                        if (attr != null)
-                        {
-                            
-                            if (sqlBuff.Contains("@"+attr.Name))
-                            {
-                                // 证明预编译语句里面有这个属性
-                                var value = property.GetValue(this.whereObj);
-                                var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
-                                param.Value = value;
-                                paramList.Add(param);
-                            }
-                        }
+                        // 证明预编译语句里面有这个属性
+                        var value = PropertyMap[key].GetValue(this.whereObj);
+                        Column attr = PropertyMap[key].GetCustomAttributes(typeof(Column), true)[0] as Column;
+                        var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
+                        param.Value = value;
+                        paramList.Add(param);
                     }
                 }
             }
@@ -250,7 +242,7 @@ namespace CORM
                 // 如果这个属性存在的话
                 if (value != null)
                 {
-                    // 从注解厘米拿到具体的字段名称，拼接
+                    // 从注解里面拿到具体的字段名称，拼接
                     var objAttrs = property.GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {

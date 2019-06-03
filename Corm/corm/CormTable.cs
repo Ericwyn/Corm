@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Reflection;
 using CORM.attrs;
 using CORM.utils;
 
@@ -9,7 +9,7 @@ namespace CORM
     {
         public Corm _corm { get; }
         public string _tableName { get; }
-        public List<string> ColumnNameTemp { get; }
+        public Dictionary<string, PropertyInfo> PropertyMap { get; }
         
         public CormTable(Corm corm)
         {
@@ -31,7 +31,8 @@ namespace CORM
                                         "请使用 [CormTable(TableName=\"xxx\")] 或在CormTable 构造函数中指定");
    
             }
-            this.ColumnNameTemp = new List<string>();
+
+            PropertyMap = new Dictionary<string, PropertyInfo>();
             foreach (var property in properties)
             {
                 var objAttrs = property.GetCustomAttributes(typeof(Column), true);
@@ -40,31 +41,14 @@ namespace CORM
                     Column attr = objAttrs[0] as Column;
                     if (attr != null)
                     {
-                        this.ColumnNameTemp.Add(attr.Name);
+                        PropertyMap.Add(attr.Name, property);
+                        continue;
                     }
                 }
+                PropertyMap.Add(property.Name, property);
             }
         }
         
-        public CormTable(Corm corm ,string tableName)
-        {
-            this._corm = corm;
-            this._tableName = tableName;
-            var properties = typeof(T).GetProperties();
-            foreach (var property in properties)
-            {
-                var objAttrs = property.GetCustomAttributes(typeof(Column), true);
-                if (objAttrs.Length > 0)
-                {
-                    Column attr = objAttrs[0] as Column;
-                    if (attr != null)
-                    {
-                        this.ColumnNameTemp.Add(attr.Name);
-                    }
-                }
-            }
-        }
-
         // Select 查询
         public CormSelectMiddleSql<T> Find()
         {

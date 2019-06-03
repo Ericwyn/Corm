@@ -24,7 +24,7 @@ namespace CORM
         {
             this._cormTable = cormTable;
             this.tableName = _cormTable._tableName;
-            this.columnNameTemp = cormTable.ColumnNameTemp;
+//            this.columnNameTemp = cormTable.ColumnNameTemp;
         }
         
         public CormCustomizeMiddleSql<T> SQL(string sqlStr)

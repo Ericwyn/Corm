@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Reflection;
 using CORM.attrs;
 using CORM.utils;
 
@@ -11,7 +12,7 @@ namespace CORM
         private string sqlBuff;
         private string tableName;
         // 缓存该类型的列名，避免经常反射
-        private List<string> columnNameTemp;
+        private Dictionary<string, PropertyInfo> PropertyMap;
 
         private T whereObj;
         private bool deleteAllFlag = false;
@@ -20,7 +21,7 @@ namespace CORM
         {
             this._cormTable = cormTable;
             this.tableName = _cormTable._tableName;
-            this.columnNameTemp = cormTable.ColumnNameTemp;
+            this.PropertyMap = _cormTable.PropertyMap;
         }
 
         public CormDeleteMiddleSql<T> Where(T obj)
@@ -82,24 +83,16 @@ namespace CORM
             var properties = typeof(T).GetProperties();
             if (sqlBuff.Contains("WHERE "))
             {
-                // 预编译的 Sql语句里面，有 Where 的话就要放入值
-                foreach (var property in properties)
+                foreach (string key in PropertyMap.Keys)
                 {
-                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
-                    if (objAttrs.Length > 0)
+                    if (sqlBuff.Contains("@"+key))
                     {
-                        Column attr = objAttrs[0] as Column;
-                        if (attr != null)
-                        {
-                            if (sqlBuff.Contains("@"+attr.Name))
-                            {
-                                // 证明预编译语句里面有这个属性
-                                var value = property.GetValue(this.whereObj);
-                                var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
-                                param.Value = value;
-                                paramList.Add(param);
-                            }
-                        }
+                        // 证明预编译语句里面有这个属性
+                        var value = PropertyMap[key].GetValue(this.whereObj);
+                        Column attr = PropertyMap[key].GetCustomAttributes(typeof(Column), true)[0] as Column;
+                        var param = new SqlParameter("@"+attr.Name, attr.DbType, attr.Size);
+                        param.Value = value;
+                        paramList.Add(param);
                     }
                 }
             }

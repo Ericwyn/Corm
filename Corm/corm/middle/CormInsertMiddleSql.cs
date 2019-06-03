@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Reflection;
 using CORM.attrs;
 using CORM.utils;
 
@@ -14,8 +15,10 @@ namespace CORM
         private CormTable<T> _cormTable;
         private string sqlBuff;
         private string tableName;
-        // 缓存该类型的列名，避免经常反射
-        private List<string> columnNameTemp;
+        // 缓存 Property
+        private Dictionary<string, PropertyInfo> PropertyMap;
+        // 缓存该类型的列名，避免经常反射, 使用数组保证顺序一致
+        private string[] columnNameArrary;
 
         private T insertTemp;
         private List<T> insertTempList;
@@ -24,7 +27,13 @@ namespace CORM
         {
             this._cormTable = cormTable;
             this.tableName = _cormTable._tableName;
-            this.columnNameTemp = cormTable.ColumnNameTemp;
+            this.PropertyMap = _cormTable.PropertyMap;
+            this.columnNameArrary = new string[this.PropertyMap.Keys.Count];
+            var index = 0;
+            foreach (string key in this.PropertyMap.Keys)
+            {
+                columnNameArrary[index++] = key;
+            }
         }
         
         // 插入一条数据
@@ -75,7 +84,7 @@ namespace CORM
             }
             
             sqlBuff = "INSERT INTO " + this.tableName + "(";
-            foreach (var columnName in columnNameTemp)
+            foreach (var columnName in columnNameArrary)
             {
                 sqlBuff += columnName + ",";
             }
@@ -85,7 +94,7 @@ namespace CORM
             for (var i = 0; i < insertTempList.Count; i++)
             {
                 sqlBuff += "\n(";
-                foreach (var colunmName in columnNameTemp)
+                foreach (var colunmName in columnNameArrary)
                 {
                     sqlBuff += "@" + colunmName + flagForListItem + i +",";
                 }
@@ -106,12 +115,11 @@ namespace CORM
             {
                 insertObj = insertTempList[i];
                 // 这里的值的排列循序需要按照 colunmNameTemp 的顺序
-                var properties = typeof(T).GetProperties();
-                foreach (var property in properties)
+                foreach (var columnName in columnNameArrary)
                 {
                     var param = new SqlParameter();
                     // 从注解拿到具体的字段名称，拼接
-                    var objAttrs = property.GetCustomAttributes(typeof(Column), true);
+                    var objAttrs = PropertyMap[columnName].GetCustomAttributes(typeof(Column), true);
                     if (objAttrs.Length > 0)
                     {
                         Column attr = objAttrs[0] as Column;
@@ -119,7 +127,7 @@ namespace CORM
                         {
                             // 创建 param 以填充 sqlBuff 当中的占位符
                             param = new SqlParameter("@" + attr.Name + flagForListItem + i, attr.DbType, attr.Size);
-                            var value = property.GetValue(insertObj);
+                            var value = PropertyMap[columnName].GetValue(insertObj);
                             // 如果这个属性存在的话
                             if (value != null)
                             {
