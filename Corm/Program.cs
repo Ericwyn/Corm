@@ -48,6 +48,9 @@ namespace CORM
                 .Build();
             var studentTable = new CormTable<Student>(corm);
 
+            Console.WriteLine(CormUtils<Student>.GetTableName());
+            Console.WriteLine(CormUtils<Student>.GetProPropertyInfoMap().Count);
+
             List<Student> list;
                         
             /*

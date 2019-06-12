@@ -115,13 +115,13 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
     示例代码如下
     
         // SELECT 自定义查询语句
-        var list = studentTable.Find().Customize(
-            "SELECT * FROM Student WHERE studentName_=@studentName_",
-            new SqlParameter[]
-            {
-                new SqlParameter("@studentName_", "test3"),
-            }
-        ).Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
+        var list = studentTable.Customize().SQL(
+        "SELECT * FROM Student WHERE studentName_=@studentName_",
+        new SqlParameter[]
+        {
+            new SqlParameter("@studentName_", "test3"),
+        })
+        .Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
         Console.WriteLine(list);
  
  - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 `SqlDataReaderParse<T>.parse()`方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取和解析
@@ -286,3 +286,11 @@ CormTransaction 缓存一次事务操作中，多个 Sql 操作所共同需要�
             transaction.Rollback();
         }
     }
+
+### 其他工具
+CormUtils 封装了一些方法，用以更好的使用 Corm 框架
+ - GetTableName 可以获取 Entity 类的表名   
+ - GetProPropertyInfoMap 可以获取 Entity 类当中，所有字段的 Map
+        
+        Console.WriteLine(CormUtils<Student>.GetTableName());
+        Console.WriteLine(CormUtils<Student>.GetProPropertyInfoMap().Count);
