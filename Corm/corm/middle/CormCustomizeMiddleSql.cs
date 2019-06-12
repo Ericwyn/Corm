@@ -29,10 +29,15 @@ namespace CORM
         
         public CormCustomizeMiddleSql<T> SQL(string sqlStr)
         {
-            return SQL(sqlStr, null);
+            return SQL(sqlStr, new List<SqlParameter>());
         }
 
         public CormCustomizeMiddleSql<T> SQL(string sqlStr, SqlParameter[] parameters)
+        {
+            return SQL(sqlStr, new List<SqlParameter>(parameters));
+        }
+        
+        public CormCustomizeMiddleSql<T> SQL(string sqlStr, List<SqlParameter> parameters)
         {
             if (sqlStr == null || sqlStr.Trim().Equals(""))
             {
@@ -52,7 +57,7 @@ namespace CORM
             }
             return this;
         }
-
+        
         /*
          * 无返回的 SQL 运行
          */
