@@ -49,7 +49,7 @@ namespace CORM
             var studentTable = new CormTable<Student>(corm);
 
             List<Student> list;
-            
+                        
             /*
             // SELECT 查询全部数据
             list = studentTable.Find().Commit();
@@ -149,6 +149,7 @@ namespace CORM
             */
 
             
+            /*
             // Delete 删除操作
             // 删除该表全部数据
 //            studentTable.Delete().All().Commit();
@@ -158,7 +159,7 @@ namespace CORM
                 studentName = "testtest", 
                 studentAge = 20, 
             }).Commit();
-            
+            */
 
             /*
             // 事务操作示例

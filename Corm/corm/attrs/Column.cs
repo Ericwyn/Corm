@@ -16,9 +16,9 @@ namespace CORM.attrs
             set { name = value; }
         }
 
-        private int _size ;
+        private int? _size ;
 
-        public int Size
+        public int? Size
         {
             get { return _size; }
             set { _size = value; }

@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Reflection;
+using System.Text;
 using CORM.attrs;
 using CORM.utils;
 
@@ -88,6 +91,39 @@ namespace CORM
         {
             _corm.LogUtils.SqlPrint(sql);
         }
+
+        // 获取数据库定义
+        public string DDL()
+        {
+            StringBuilder ddl = new StringBuilder("CREATE TABLE dbo.").Append(_tableName).Append(" ").Append("(").Append(Environment.NewLine);
+            int count = 1;
+            foreach (string columnName in PropertyMap.Keys)
+            {
+                Column attr = PropertyMap[columnName].GetCustomAttributes(typeof(Column), true)[0] as Column;
+                ddl.Append(attr.Name).Append(" ").Append(attr.DbType.ToString()).Append(" ");
+                if (attr.Size != null)
+                {
+                    ddl.Append("(").Append(attr.Size).Append(")").Append(" ");
+                }
+
+                if (attr.DbType.ToString().ToLower().Contains("char"))
+                {
+                    ddl.Append("COLLATE Chinese_PRC_CI_AS").Append(" ");
+                }
+
+                ddl.Append("NULL");
+                if (count < PropertyMap.Count)
+                {
+                    ddl.Append(",");
+                }
+
+                ddl.Append(Environment.NewLine);
+                count++;
+            }
+
+            return ddl.Append(") GO").ToString();
+        }
+        
         
     }
     
