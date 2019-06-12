@@ -100,12 +100,12 @@ namespace CORM
             foreach (string columnName in PropertyMap.Keys)
             {
                 Column attr = PropertyMap[columnName].GetCustomAttributes(typeof(Column), true)[0] as Column;
-                ddl.Append(attr.Name).Append(" ").Append(attr.DbType.ToString()).Append(" ");
-                if (attr.Size != null)
+                ddl.Append("    ").Append(attr.Name).Append(" ").Append(attr.DbType.ToString()).Append(" ");
+                if (attr.Size != null && attr.Size > 0)
                 {
                     ddl.Append("(").Append(attr.Size).Append(")").Append(" ");
                 }
-
+                
                 if (attr.DbType.ToString().ToLower().Contains("char"))
                 {
                     ddl.Append("COLLATE Chinese_PRC_CI_AS").Append(" ");
