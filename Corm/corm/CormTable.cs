@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
+using System.Security;
 using System.Text;
 using CORM.attrs;
 using CORM.utils;
@@ -71,31 +72,47 @@ namespace CORM
         public string DDL()
         {
             StringBuilder ddl = new StringBuilder("CREATE TABLE dbo.").Append(_tableName).Append(" ").Append("(").Append(Environment.NewLine);
-            int count = 1;
+            List<string> primaryKeySQL = new List<string>();
             foreach (string columnName in PropertyMap.Keys)
             {
                 Column attr = PropertyMap[columnName].GetCustomAttributes(typeof(Column), true)[0] as Column;
-                ddl.Append("    ").Append(attr.Name).Append(" ").Append(attr.DbType.ToString()).Append(" ");
+                ddl.Append("    ").Append(attr.Name).Append(" ").Append(attr.DbType.ToString());
                 if (attr.Size != null && attr.Size > 0)
                 {
-                    ddl.Append("(").Append(attr.Size).Append(")").Append(" ");
+                    ddl.Append("(").Append(attr.Size).Append(")");
                 }
                 
                 if (attr.DbType.ToString().ToLower().Contains("char"))
                 {
-                    ddl.Append("COLLATE Chinese_PRC_CI_AS").Append(" ");
+                    ddl.Append(" COLLATE Chinese_PRC_CI_AS");
                 }
 
-                ddl.Append("NULL");
-                if (count < PropertyMap.Count)
+                ddl.Append(" ");
+                
+                if (attr.NotNull)
                 {
-                    ddl.Append(",");
+                    ddl.Append("NOT NULL");
                 }
-
+                else
+                {
+                    ddl.Append("NULL");
+                }
+                ddl.Append(",");
                 ddl.Append(Environment.NewLine);
-                count++;
+
+                if (attr.PrimaryKey)
+                {
+                    primaryKeySQL.Add("CONSTRAINT " + _tableName + "_PK PRIMARY KEY (" + attr.Name + ")");
+                }
             }
 
+            var primaryKeyCount = primaryKeySQL.Count;
+            for (int i = 0; i < primaryKeyCount; i++)
+            {
+                ddl.Append("    ").Append(primaryKeySQL[i]).Append(",");
+                ddl.Append(Environment.NewLine);
+            }
+            
             return ddl.Append(") GO").ToString();
         }
         

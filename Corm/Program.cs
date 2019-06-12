@@ -11,9 +11,9 @@ namespace CORM
     [Table(TableName = "Student")]
     public class Student
     {
-        [Column(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
+        [Column(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar, PrimaryKey = true)]
         public string studentName { get; set; }
-        [Column(Name = "studentAge_", Size = 2, DbType = SqlDbType.Int)]
+        [Column(Name = "studentAge_", DbType = SqlDbType.Int)]
         public int? studentAge { get; set; }
     }
     
@@ -50,7 +50,9 @@ namespace CORM
 
             Console.WriteLine(CormUtils<Student>.GetTableName());
             Console.WriteLine(CormUtils<Student>.GetProPropertyInfoMap().Count);
-
+            
+            Console.WriteLine(studentTable.DDL());
+            
             List<Student> list;
                         
             /*
