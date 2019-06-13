@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Security.Policy;
+using AIC_KWS.Models;
 using CORM.utils;
 using CORM.attrs;
 
@@ -11,7 +12,9 @@ namespace CORM
     [Table(TableName = "Student")]
     public class Student
     {
-        [Column(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar, PrimaryKey = true)]
+        [Column(Name = "Id", Size = 64, DbType = SqlDbType.VarChar, PrimaryKey = true)]
+        public string Id { get; set; }
+        [Column(Name = "studentName_", Size = 10,DbType = SqlDbType.VarChar)]
         public string studentName { get; set; }
         [Column(Name = "studentAge_", DbType = SqlDbType.Int)]
         public int? studentAge { get; set; }
@@ -44,15 +47,29 @@ namespace CORM
         {
             var corm = new Corm.CormBuilder()
                 .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
-                .SqlPrint(new CustomSqlPrintCb())
+//                .SqlPrint(new CustomSqlPrintCb())
                 .Build();
             var studentTable = new CormTable<Student>(corm);
+            
+            // 判断表是否存在，删除表，建表
+            if (studentTable.Exist())
+            {
+                studentTable.DropTable();
+                studentTable.CreateTable();
+            }
+            else
+            {
+                studentTable.CreateTable();
+            }
+            
+//            获取 Entity 类的信息
+//            Console.WriteLine(CormUtils<Student>.GetTableName());
+//            Console.WriteLine(CormUtils<Student>.GetProPropertyInfoMap().Count);
 
-            Console.WriteLine(CormUtils<Student>.GetTableName());
-            Console.WriteLine(CormUtils<Student>.GetProPropertyInfoMap().Count);
+//            显示 DDL
+//            Console.WriteLine(studentTable.DDL());
             
-            Console.WriteLine(studentTable.DDL());
-            
+
             List<Student> list;
                         
             /*

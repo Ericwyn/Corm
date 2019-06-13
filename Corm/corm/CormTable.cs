@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Reflection;
 using System.Security;
 using System.Text;
@@ -58,6 +59,58 @@ namespace CORM
             return new CormCustomizeMiddleSql<T>(this);
         }
         
+        // 删除该表
+        public void DropTable()
+        {
+            using (SqlConnection conn = _corm.NewConnection())
+            {
+                var sql = @"DROP TABLE " + _tableName;
+                this.SqlLog(sql);
+                SqlCommand sqlCommand = new SqlCommand(sql, conn);
+                var count = sqlCommand.ExecuteNonQuery();
+            }
+        }
+        
+        // 创建表格
+        public void CreateTable()
+        {
+            var sql = DDL();
+            using (SqlConnection conn = _corm.NewConnection())
+            {
+                this.SqlLog(sql);
+                SqlCommand sqlCommand = new SqlCommand(sql, conn);
+                sqlCommand.ExecuteNonQuery(); 
+            }
+        }
+
+        public bool Exist()
+        {
+            try
+            {
+                using (SqlConnection conn = _corm.NewConnection())
+                {
+                    var sql = @"SELECT TOP(1) * FROM " + _tableName;
+                    this.SqlLog(sql);
+                    SqlCommand sqlCommand = new SqlCommand(sql, conn);
+                    sqlCommand.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            catch (SqlException e)
+            {
+                if (e.Message.Contains("对象名") && e.Message.Contains("无效"))
+                {
+                    return false;
+                }
+                else
+                {
+                    Console.WriteLine("判断数据表是否存在的时候发生异常 : " + e.Message);
+                    return false;
+                }
+            }
+            
+        }
+        
         public CormTransaction BeginTransaction()
         {
             return new CormTransaction(this._corm);
@@ -113,7 +166,7 @@ namespace CORM
                 ddl.Append(Environment.NewLine);
             }
             
-            return ddl.Append(") GO").ToString();
+            return ddl.Append(")").ToString();
         }
         
         
