@@ -32,11 +32,15 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
     public static void Main(string[] args)
         {
+            // 创建数据库连接
             var corm = new Corm.CormBuilder()
                 .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
                 .SqlPrint(new CustomSqlPrintCb())
                 .Build();
+ 
+            // 创建 Table 映射
             var studentTable = new CormTable<Student>(corm);
+            // 查询操作
             List<Student> studentTable.Find().Commit();
         }
 
@@ -44,7 +48,26 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
  - CormTable 创建的时候可以手动设置对应的表的名字
  - 也可使用 `[CormTable(TableName="xxx")]` 来标记 Entity 类对应的表的名称，无需在创建时候传入
 
-## 具体说明
+## 数据表维护
+ - `CormTable<T>.DropTable()` 可删除表
+ - `CormTable<T>.CreateTable()` 可创建表
+ - `CormTable<T>.Exist()` 可查看表是否存在
+
+        // 判断表是否存在
+        if (studentTable.Exist())
+        {
+            // 删除表
+            studentTable.DropTable();
+            // 重新建表
+            studentTable.CreateTable();
+        }
+        else
+        {
+            // 建表
+            studentTable.CreateTable();
+        }
+
+## CURD 具体说明
 ### Select 查询操作
  - Find All
     

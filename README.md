@@ -75,7 +75,19 @@
    - CommitForNone(CormTransaction trans)
    - CommitForList(CormTransaction trans)
    - CommitForReader(CormTransaction trans)
-
+ 
+ - DropTable()
+    
+    删除数据表
+ 
+ - CreateTable()
+    
+    创建数据表
+ 
+ - Exist()
+ 
+    判断表是否存在
+    
 ## 其他功能
  - 事务操作
  - SqlDataReaderParse<T>
