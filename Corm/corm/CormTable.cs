@@ -62,6 +62,7 @@ namespace CORM
         // 删除该表
         public void DropTable()
         {
+            if (Exist()){return;}
             using (SqlConnection conn = _corm.NewConnection())
             {
                 var sql = @"DROP TABLE " + _tableName;

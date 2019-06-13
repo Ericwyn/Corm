@@ -51,16 +51,16 @@ namespace CORM
                 .Build();
             var studentTable = new CormTable<Student>(corm);
             
-            // 判断表是否存在，删除表，建表
-            if (studentTable.Exist())
-            {
+//            // 判断表是否存在，删除表，建表
+//            if (studentTable.Exist())
+//            {
                 studentTable.DropTable();
-                studentTable.CreateTable();
-            }
-            else
-            {
-                studentTable.CreateTable();
-            }
+//                studentTable.CreateTable();
+//            }
+//            else
+//            {
+//                studentTable.CreateTable();
+//            }
             
 //            获取 Entity 类的信息
 //            Console.WriteLine(CormUtils<Student>.GetTableName());
