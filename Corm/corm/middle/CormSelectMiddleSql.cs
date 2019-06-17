@@ -177,7 +177,7 @@ namespace CORM
             
             sqlBuilder.Append(GetOrderQuery(this.orderByAttributes, this.orderDescByAttributes));
             // 拼接 ";"
-            sqlBuilder.Append(";");
+            sqlBuilder.Append(" ;");
             List<SqlParameter> paramList = new List<SqlParameter>();
             if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
             {
@@ -192,7 +192,7 @@ namespace CORM
             {
                 foreach (string key in PropertyMap.Keys)
                 {
-                    if (sql.Contains("@"+key))
+                    if (sql.Contains("@"+key+" "))
                     {
                         // 证明预编译语句里面有这个属性
                         var value = PropertyMap[key].GetValue(this.whereObj);

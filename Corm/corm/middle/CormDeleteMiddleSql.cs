@@ -62,7 +62,7 @@ namespace CORM
                 if (whereObj == null && deleteAllFlag)
                 {
                     // All 条件
-                    sqlBuilder.Append(";");
+                    sqlBuilder.Append(" ;");
                 }
                 else if (whereObj != null && !deleteAllFlag)
                 {
@@ -75,7 +75,7 @@ namespace CORM
                     else
                     {
                         sqlBuilder.Append(whereQuery);
-                        sqlBuilder.Append(";");
+                        sqlBuilder.Append(" ;");
                     }
                 }
                 else
@@ -92,7 +92,7 @@ namespace CORM
             {
                 foreach (string key in PropertyMap.Keys)
                 {
-                    if (sql.Contains("@"+key))
+                    if (sql.Contains("@"+key+" "))
                     {
                         // 证明预编译语句里面有这个属性
                         var value = PropertyMap[key].GetValue(this.whereObj);

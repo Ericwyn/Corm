@@ -120,7 +120,7 @@ namespace CORM
                 }
             }
 
-            sqlBuilder.Append(";");
+            sqlBuilder.Append(" ;");
 
             // 开始执行事务
 //            var sqlCommand = new SqlCommand(sqlBuff, this._cormTable._corm._sqlConnection);
