@@ -71,6 +71,7 @@ namespace CORM
          */
         public int CommitForNone(CormTransaction transaction)
         {
+            _cormTable.SqlLog(customizeSqlBuff);
             int resLineCount = -1;
             SqlCommand sqlCommand;
             if (transaction != null)
@@ -116,6 +117,7 @@ namespace CORM
         {
             SqlDataReader reader = null;
             SqlCommand sqlCommand;
+            _cormTable.SqlLog(customizeSqlBuff);
             if (!customizeSqlBuff.Equals(""))
             {
                 if (transaction != null)
