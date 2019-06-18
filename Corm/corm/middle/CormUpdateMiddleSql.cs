@@ -87,7 +87,7 @@ namespace CORM
                     {
                         continue;
                     }
-                    if (sql.Contains(attr.Name + flagForOldValue))
+                    if (sql.Contains(attr.Name + flagForOldValue + " "))
                     {
                         var param = new SqlParameter();
                         // 创建 param 以填充 sqlBuff 当中的占位符
@@ -105,7 +105,7 @@ namespace CORM
                         paramList.Add(param);
                     }
 
-                    if (sql.Contains(attr.Name + flagForValueQuery))
+                    if (sql.Contains(attr.Name + flagForValueQuery + " "))
                     {
                         var param = new SqlParameter();
                         // 创建 param 以填充 sqlBuff 当中的占位符
