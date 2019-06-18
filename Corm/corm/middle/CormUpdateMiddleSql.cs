@@ -74,6 +74,7 @@ namespace CORM
             sqlBuilder.Append(" ;");
 
             var sql = sqlBuilder.ToString();
+            this._cormTable.SqlLog(sql);
             List<SqlParameter> paramList = new List<SqlParameter>(); 
             var properties = typeof(T).GetProperties();
             foreach (var property in properties)
@@ -87,7 +88,7 @@ namespace CORM
                     {
                         continue;
                     }
-                    if (sql.Contains(attr.Name + flagForOldValue + " "))
+                    if (sql.Contains("@" + attr.Name + flagForOldValue +" "))
                     {
                         var param = new SqlParameter();
                         // 创建 param 以填充 sqlBuff 当中的占位符
@@ -100,12 +101,12 @@ namespace CORM
                         }
                         else
                         {
-                            throw new CormException("UPDATE 操作当中，WHERE 语句拼接错误");
+                            throw new CormException("UPDATE 操作当中，WHERE 语句拼接错误 --> 参数名:" + attr.Name);
                         }
                         paramList.Add(param);
                     }
 
-                    if (sql.Contains(attr.Name + flagForValueQuery + " "))
+                    if (sql.Contains("@" + attr.Name + flagForValueQuery +" "))
                     {
                         var param = new SqlParameter();
                         // 创建 param 以填充 sqlBuff 当中的占位符
@@ -118,14 +119,13 @@ namespace CORM
                         }
                         else
                         {
-                            throw new CormException("UPDATE 操作当中, SET 语句拼接错误");
+                            throw new CormException("UPDATE 操作当中, SET 语句拼接错误 --> 参数名:" + attr.Name);
                         }
                         paramList.Add(param);
                     }
                 }
             }
             
-            this._cormTable.SqlLog(sql);
             if (transaction != null)
             {
                 resUpdateSize = transaction.AddSql(sql, paramList).ExecuteNonQuery();
