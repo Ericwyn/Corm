@@ -72,7 +72,7 @@ namespace CORM
             
             if (insertTemp == null && insertTempList == null)
             {
-                throw new Exception(" [Corm] 调用 Insert 方法时候添加插入数据");
+                throw new Exception(" [Corm] 调用 Insert 方法时候没有添加插入数据");
             }
             if (insertTempList == null)
             {
@@ -82,6 +82,11 @@ namespace CORM
             if (insertTemp != null)
             {
                 insertTempList.Add(insertTemp);
+            }
+
+            if (insertTempList.Count == 0)
+            {
+                throw new Exception(" [Corm] 调用 Insert 方法时候插入函数为 0 ");
             }
             
             sqlBuilder.Append("INSERT INTO ");

@@ -52,7 +52,6 @@
     <Compile Include="corm\utils\CormLogUtils.cs" />
     <Compile Include="corm\utils\CormUtils.cs" />
     <Compile Include="corm\utils\SqlDataReaderParse.cs" />
-    <Compile Include="test\Model.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
