@@ -72,9 +72,14 @@
    - CommitForNone()
    - CommitForList()
    - CommitForReader()
+   - CommitForHas()
+        
+        返回一个 bool ，表示是否存在以查询条件来限定的行
+        
    - CommitForNone(CormTransaction trans)
    - CommitForList(CormTransaction trans)
    - CommitForReader(CormTransaction trans)
+   - CommitForHas(CormTransaction trans)
  
  - DropTable()
     

@@ -97,6 +97,16 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
     因为比较常用所以单独变成一个方法，就是对 Top(1) 和 Commit() 方法的封装
     
         Student = studentTable.Find().CommitForOne();
+  
+ - 判断Select 能否查询到数据
+    
+    也是因为比较常用所以进行封装，先使用 CommitForReader 获得 reader，然后返回 reader.HasRows ;
+        
+        // 判断是否存在特定条件的学生
+        bool hasThisStudent = studentTable.Find().Where(new Student() {
+            studentName = "inset2"
+        }).CommitForHas();
+        Console.WriteLine(hasThisStudent);
  
  - Order By ASC | DESC 排序
  
@@ -149,7 +159,6 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
  
  - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 `SqlDataReaderParse<T>.parse()`方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取和解析
     - `CommitForReader()` 方法同样支持事务操作
- 
 
  
 ### Insert 操作

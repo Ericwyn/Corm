@@ -54,7 +54,7 @@ namespace CORM
 //            // 判断表是否存在，删除表，建表
 //            if (studentTable.Exist())
 //            {
-                studentTable.DropTable();
+//                studentTable.DropTable();
 //                studentTable.CreateTable();
 //            }
 //            else
@@ -97,12 +97,9 @@ namespace CORM
             list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
             
-
-            
             // SELECT 只查询前 n 条
             list = studentTable.Find().Top(1).Commit();
             Console.WriteLine(list.Count);
-            
 
             // SELECT Like 查询
             // 将会得到 
@@ -141,11 +138,13 @@ namespace CORM
             // INSERT 插入，可插入 list 或者 单条数据，插入数据带有事务性质
             var insert1 = new Student
             {
+                Id = "aaa",
                 studentAge = 1, 
                 studentName = "inset1",
             };
             var insert2 = new Student()
             {
+                Id = "bbb",
                 studentAge = 02,
                 studentName = "inset2",
             };
@@ -169,7 +168,12 @@ namespace CORM
             })
             .Commit();
             */
-
+            
+            /*
+            // 判断是否存在特定条件的学生
+            bool hasThisStudent = studentTable.Find().Where(new Student() {studentName = "inset2"}).CommitForHas();
+            Console.WriteLine(hasThisStudent);
+            */
             
             /*
             // Delete 删除操作

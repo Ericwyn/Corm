@@ -220,6 +220,20 @@ namespace CORM
             return reader;
         }
         
+        // 判断 Select 是否能够查找到对象
+        public bool CommitForHas()
+        {
+            return commitForHas(null);
+        }
+        public bool commitForHas(CormTransaction transaction)
+        {
+            using (var reader = CommitForReader(transaction))
+            {
+                var has = reader.HasRows;
+                reader.Close();
+                return has;
+            }
+        }
         
         // 得到 Sort 语句
         private static string GetOrderQuery(string[] orderByList, string[] orderDescByList)
