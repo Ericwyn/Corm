@@ -223,9 +223,9 @@ namespace CORM
         // 判断 Select 是否能够查找到对象
         public bool CommitForHas()
         {
-            return commitForHas(null);
+            return CommitForHas(null);
         }
-        public bool commitForHas(CormTransaction transaction)
+        public bool CommitForHas(CormTransaction transaction)
         {
             using (var reader = CommitForReader(transaction))
             {
