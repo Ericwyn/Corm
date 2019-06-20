@@ -7,10 +7,12 @@
 Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
 # Attribute
- - `[CormColumn(Name, Length, SqlDbType)]`
-     - 在 Entity 类的属性当中标记数据库的列
+
  - `[CormTable(TableName)]`
 	 - 在 Entity 类上标记数据库的名称
+ - `[CormColumn(Name, Size, SqlDbType, NotNull, PrimaryKey)]`
+     - 在 Entity 类的属性当中标记数据库的列
+
 
 # 使用说明
  - [快速开始](#快速开始)
@@ -107,9 +109,11 @@ Builder 支持以下方法
  - 如果数据表不存在，那么数据表将会被创建
  - 如果数据表存在，Corm 将会把 Entity 类和当前已有的数据表的表结构进行对比
     - 如果当前的 Entity 类存在某个字段，是已有数据表中没有的，那么该字段将被加入
+    - 添加的时候，只会设置新字段的 (名称, 属性, 长度, 非空),不会设置其他信息 (例如主键)
  - 其余情况将不对数据库已有表结构做任何修改
 
  对于一个 CormTable<T> ，其绑定的数据表，最多只会在整个程序的运行过程中被自动同步一次表结构，所以无需担心创建多个 CormTable<Entity> 被多次创建的时候，Entity 绑定的表也被多次同步。
+
 
 ## CURD 具体说明
 ### Select 查询操作
