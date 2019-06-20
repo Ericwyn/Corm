@@ -27,6 +27,10 @@ namespace CORM
         public string _tableName { get; }
         public Dictionary<string, PropertyInfo> PropertyMap { get; }
         
+        // 已经进行过创建 / 同步的数据表
+        private static HashSet<string> initAndSyncFlag = new HashSet<string>();
+        private static  object initAndSyncLock = new object();
+        
         public CormTable(Corm corm)
         {
             this._corm = corm;
@@ -38,6 +42,10 @@ namespace CORM
                                         "请使用 [CormTable(TableName=\"xxx\")] 或在CormTable 构造函数中指定");
             }
             PropertyMap = CormUtils<T>.GetProPropertyInfoMap();
+            if (_corm.syncTableFlag)
+            {
+                InitOrSyncTable();
+            }
         }
         
         // Select 查询
@@ -185,10 +193,34 @@ namespace CORM
                     AddColumn(PropertyMap[newStructColumnName]);
                 }
             }
-            
-            
         }
 
+        // 启动 / 同步表结构
+        // 此处有锁，模拟单例模式，并有一个 Flag Set 来记录有哪些表已经被 创建/同步 了
+        // 所以对于每一张表，这个 InitOrSyncTable 都只会调用一次
+        public void InitOrSyncTable()
+        {
+            if (!initAndSyncFlag.Contains(_tableName))
+            {
+                lock (initAndSyncLock)
+                {
+                    if (!initAndSyncFlag.Contains(_tableName))
+                    {
+                        SqlLog("自动同步 " + _tableName +" 表结构");
+                        if (Exist())
+                        {
+                            SyncTableStruct();
+                        }
+                        else
+                        {
+                            CreateTable();
+                        }
+                        initAndSyncFlag.Add(_tableName);
+                    }
+                }
+            }
+        }
+        
         // 在已有的表上面，添加一个新的字段
         private void AddColumn(PropertyInfo propertyInfo)
         {

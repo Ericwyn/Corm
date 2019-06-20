@@ -15,6 +15,8 @@ namespace CORM
         public string studentName { get; set; }
         [Column(Name = "studentAge_", DbType = SqlDbType.Int)]
         public int? studentAge { get; set; }
+        [Column(Name = "studentSex_", DbType = SqlDbType.VarChar, Size = 2)]
+        public int? studentSex { get; set; }
     }
     
     internal class Program
@@ -44,10 +46,11 @@ namespace CORM
         {
             var corm = new Corm.CormBuilder()
                 .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
-//                .SqlPrint(new CustomSqlPrintCb())
+//                .SqlPrint(new CustomSqlPrintCb())    // 是否使用自定义的 Sql 打印方法
+                .SyncTable(true)            // 是否自动创建表/自动同步表结构
                 .Build();
             var studentTable = new CormTable<Student>(corm);
-            
+
 //            // 判断表是否存在，删除表，建表
 //            if (studentTable.Exist())
 //            {

@@ -15,11 +15,13 @@ namespace CORM
 
         public string ConnectStr { get; }
         public CormLogUtils LogUtils { get; }
-
-        private Corm(string connectionStr, CormLogUtils logUtils)
+        public bool syncTableFlag { get; }
+        
+        private Corm(string connectionStr, CormLogUtils logUtils, bool syncTableFlag)
         {
             this.ConnectStr = connectionStr;
             this.LogUtils = logUtils;
+            this.syncTableFlag = syncTableFlag;
         }
         
         public SqlConnection NewConnection()
@@ -44,6 +46,7 @@ namespace CORM
         
             private string _connectStr = "";
             private CormSqlPrintCB _sqlPrintCb = new _defaultSqlPrintCB();
+            private bool syncTableFalg = false;
 //        private bool _allDebugLog = false;
         
             public CormBuilder(){}
@@ -60,6 +63,12 @@ namespace CORM
                 return this;
             }
 
+            public CormBuilder SyncTable(bool syncTableFlag)
+            {
+                this.syncTableFalg = syncTableFlag;
+                return this;
+            }
+            
 //        public CormBuilder DebugLog(bool allDebugLog)
 //        {
 //            _allDebugLog = allDebugLog;
@@ -72,7 +81,7 @@ namespace CORM
                 {
                     throw new CormException("创建 Corm 对象时候，ConnectStr 错误");
                 }
-                return new Corm(_connectStr, new CormLogUtils(this._sqlPrintCb));
+                return new Corm(_connectStr, new CormLogUtils(this._sqlPrintCb), syncTableFalg);
             }
         }
         
