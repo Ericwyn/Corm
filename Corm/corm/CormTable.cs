@@ -228,14 +228,23 @@ namespace CORM
             {
                 Column attr = propertyInfo.GetCustomAttributes(typeof(Column), true)[0] as Column;
                 StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE ").Append(_tableName).Append(" ADD ");
-                sqlBuilder.Append(attr.Name).Append(" ").Append(attr.DbType.ToString()).Append(" ");
+                sqlBuilder.Append(attr.Name).Append(" ").Append(attr.DbType.ToString());
+                if (attr.Size != null && attr.Size > 0)
+                {
+                    sqlBuilder.Append("(").Append(attr.Size).Append(") ");
+                }
+                if (attr.DbType.ToString().ToLower().Contains("char"))
+                {
+                    sqlBuilder.Append(" COLLATE Chinese_PRC_CI_AS ");
+                }
+                
                 if (attr.NotNull)
                 {
-                    sqlBuilder.Append("NOT NULL");
+                    sqlBuilder.Append(" NOT NULL");
                 }
                 else
                 {
-                    sqlBuilder.Append("NULL");
+                    sqlBuilder.Append(" NULL");
                 }
                 sqlBuilder.Append(" ;");   
                 SqlLog("表 " + _tableName +" 添加新字段 " + attr.Name +"\n" + sqlBuilder);
