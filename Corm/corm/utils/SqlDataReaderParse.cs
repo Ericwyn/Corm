@@ -10,6 +10,24 @@ namespace CORM.utils
 {
     public class SqlDataReaderParse<T> where T : new()
     {
+        // 一个回调，将一行 SqlDataReader 转换成一个 T
+        public delegate T ReaderParseCb(SqlDataReader reader);
+        
+        // 传入一个 SqlDataReader 解析回调
+        public static List<T> parse(SqlDataReader reader, ReaderParseCb readerParseCb, bool closeReader)
+        {
+            var resList = new List<T>();
+            while (reader.Read())
+            {
+                resList.Add(readerParseCb(reader));
+            }
+
+            if (closeReader)
+            {
+                reader.Close();
+            }
+            return resList;
+        }
         
         public static List<T> parse(SqlDataReader reader, bool closeReader)
         {
