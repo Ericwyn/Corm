@@ -13,6 +13,21 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 	 - 在 Entity 类上标记数据库的名称
 
 # 使用说明
+ - [快速开始](#快速开始)
+     - [Entity 类创建](#entity-类创建)
+     - [使用 Corm 完成数据库操作](##使用-corm-完成数据库操作)
+ - [数据表维护](#数据表维护)
+     - [数据表创建/删除](#数据表维护)
+ - [CURD 具体说明](#curd-具体说明)
+     - [Select](#select-查询操作)
+     - [Insert](#insert-操作)
+     - [Update](#update-操作)
+     - [Delete](#delete-操作)
+     - [自定义 SQL 语句操作](#自定义-sql-语句操作)
+     - [SqlDataReader 解析](#自定义对-sqldatareader-的解析)
+ - [事务的支持](#事务的支持)
+ - [其他工具](#其他工具)
+
 ## 快速开始
 ### Entity 类创建
     
@@ -229,7 +244,8 @@ Delete 操作可选择删除表中全部数据，或按照特定条件删除
 Corm 支持自定义 SQL 语句操作，使用 Customize() 方法可以创建一个 CormCustomizeMiddleSql 对象，该对象主要有以下方法
 
  - `SQL()`
-    - 传入原生 SQL 语句和 SqlParameter 列表
+    - 传入原生 SQL 语句和 SqlParameter 列表,
+    - 第一个参数是 SQL 语句，第二个参数是 SqlParameter 的列表或者数组
  - `CommitForNone()`
     - 不要求返回 DataReader 或者 List<T>，适用于 Update、Insert、Delete之外的操作，返回受影响的行数
  - `CommitForList()`
