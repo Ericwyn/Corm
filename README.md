@@ -10,9 +10,11 @@
 
  - Corm 连接数据库，维护 SqlConnection
  - CormTable (基于已创建的 Corm，依据 Entity 类属性的 Attribute 绑定 Table - Entity )
- - 使用 CormTable 的 Find、Insert、Update、Delete 方法完成增删改查
-	 - 具体 Sql 语句的构建交给 MiddleSql 类来完成，反射分析需要插入、查找的对象的属性和值
-	 - MiddleSql 类会将查询到的数据再自动封装成 List<T> 返回 
+ - 使用 CormTable 的 Find、Insert、Update、Delete 方法创建 MiddleSql
+	 - 具体 Sql 语句的构建交给 MiddleSql 类来完成，使用反射来分析需要插入、查找的对象的属性和值
+	 - MiddleSql 的 Commit 执行具体的 SQL 操作
+	 - MiddleSql 将 SQL 执行返回的数据再自动封装成 List<T> 返回 （SELECT 操作），还可以选择返回受影响行数、SqlDataReader
+ - [Corm 具体设计思路](#设计思路)
 
 # 功能列表
 ## 核心功能
