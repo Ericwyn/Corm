@@ -18,7 +18,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
      - [Corm 初始化](#corm-初始化)
      - [使用 Corm 完成数据库操作](#使用-corm-完成数据库操作)
  - [数据表维护](#数据表维护)
-     - [删除/创建/判断是否存在](#删除/创建/判断是否存在)
+     - [删除/创建/判断是否存在](#删除创建判断是否存在)
      - [自动维护表结构](#自动维护表结构)
  - [CURD 具体说明](#curd-具体说明)
      - [Select](#select-查询操作)
@@ -322,6 +322,10 @@ Corm 可以帮助你把 SqlDataReader 解析成任何类型，只需要使用工
          List<TempStruct> list = SqlDataReaderParse<TempStruct>.parse(reader, true); 
 
 
+ - 可以创建一个代理方法，来完成对一行 SqlDataReader 的解析，以此弥补自动反射时候，效率的不足， 代理方法定义如下
+    
+        // 方法接受一行 SqlDataReader ，将其转换成一个 T 返回
+        public delegate T ReaderParseCb(SqlDataReader reader);
 
 ### 事务的支持
 
