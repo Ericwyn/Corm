@@ -1,7 +1,7 @@
 # Corm
 一个 C# 简易 orm 框架, 支持 SqlServer
 
-不支持自动维护数据库表结构，使用的时候，先设计好数据库，之后依据数据库的表结构创建 Entity 类
+支持自动维护数据库表结构，具体可查看 [自动维护表结构-说明](#自动维护表结构)
 
  - 文档： [中文文档](doc/Doc-zh.md)
  - 代码示例： [CormTest-Program](Corm/Program.cs)
@@ -192,3 +192,12 @@ Corm 的设计思路其实非常的简单，就是 “SQL语句构造器” + �
  - 不需要事务操作的时候，`SqlCommand` 的创建和执行，都是在 `CormTable` 创建的 `MiddleSql` 对象里面完成的
  - 需要事务操作的话，就是吧 `MiddleSql` 创建好的 `SQL` 语句，统一交到一个 `CormTransaction` 里面执行
 最后，`CormTransaction` 封装 `SqlTransaction` 的 `RollBack()` 和 `Commit()` 方法，让用户操控事务的提交和回滚
+
+## 自动维护表结构
+ Corm 支持自动维护表结构，只需要在使用 CormBuilder 创建 Corm 的时候，调用 SyncTable() 方法，传入 true 参数就可以
+ 
+### 自动维护说明
+ - 如果数据表不存在，那么数据表将会被创建
+ - 如果数据表存在，Corm 将会把 Entity 类和当前已有的数据表的表结构进行对比
+    - 如果当前的 Entity 类存在某个字段，是当前数据表没有的，那么该字段将被加入
+ - 其余情况将不对数据库已有表结构做任何修改

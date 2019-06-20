@@ -15,9 +15,11 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 # 使用说明
  - [快速开始](#快速开始)
      - [Entity 类创建](#entity-类创建)
+     - [Corm 初始化](#corm-初始化)
      - [使用 Corm 完成数据库操作](#使用-corm-完成数据库操作)
  - [数据表维护](#数据表维护)
-     - [数据表创建/删除](#数据表维护)
+     - [删除/创建/判断是否存在](#删除/创建/判断是否存在)
+     - [自动维护表结构](#自动维护表结构)
  - [CURD 具体说明](#curd-具体说明)
      - [Select](#select-查询操作)
      - [Insert](#insert-操作)
@@ -43,7 +45,25 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
  - 需要使用可空类型，例如 int?、double?、bool? ，否则 Where 查询会有错误
  - **Entity类的属性都需要将get 和 set 都写为 public**，否则无法使用反射 set 和 get 到具体的 value
 
-### 使用 Corm 完成数据库操作
+### Corm 初始化
+
+Corm 使用一个 Builder 来初始化，示例代码如下
+    
+    var corm = new Corm.CormBuilder()
+        .Server("server=127.0.0.1;database=corm;uid=TestAccount;pwd=TestAccount")
+        .SqlPrint(new CustomSqlPrintCb())
+        .SyncTable(true)
+        .Build();
+
+Builder 支持以下方法
+
+ - `Server()` 传入一个 SqlConnectStr，设置数据库连接信息
+ - `SqlPrint()` 传入一个 SqlPrintCb 类，自定义设置的 Sql 日志打印
+ - `SyncTable()`  传入一个 bool ，设置是否自动维护数据库表结构
+ - `Build()` 创建一个 Corm 对象 
+
+
+### 创建 CormTable 并操作数据库
 
     public static void Main(string[] args)
         {
@@ -53,17 +73,14 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
                 .SqlPrint(new CustomSqlPrintCb())
                 .Build();
  
-            // 创建 Table 映射
+            // 创建 CormTable 映射数据库当中的表
             var studentTable = new CormTable<Student>(corm);
-            // 查询操作
+            // CURD
             List<Student> studentTable.Find().Commit();
         }
 
- - Corm 由 Corm.CormBuilder类创建，需要传入 SqlConnection String，可以传入 SqlPrintCB 自定义 sql 打印 
- - CormTable 创建的时候可以手动设置对应的表的名字
- - 也可使用 `[CormTable(TableName="xxx")]` 来标记 Entity 类对应的表的名称，无需在创建时候传入
-
 ## 数据表维护
+### 删除/创建/判断是否存在
  - `CormTable<T>.DropTable()` 可删除表
  - `CormTable<T>.CreateTable()` 可创建表
  - `CormTable<T>.Exist()` 可查看表是否存在
@@ -81,6 +98,18 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
             // 建表
             studentTable.CreateTable();
         }
+        
+### 自动维护表结构
+ Corm 支持自动维护表结构，只需要在使用 CormBuilder 创建 Corm 的时候，调用 SyncTable() 方法，传入 true 参数就可以
+ 
+ 自动维护说明时候遵循一下规则
+ 
+ - 如果数据表不存在，那么数据表将会被创建
+ - 如果数据表存在，Corm 将会把 Entity 类和当前已有的数据表的表结构进行对比
+    - 如果当前的 Entity 类存在某个字段，是已有数据表中没有的，那么该字段将被加入
+ - 其余情况将不对数据库已有表结构做任何修改
+
+ 对于一个 CormTable<T> ，其绑定的数据表，最多只会在整个程序的运行过程中被自动同步一次表结构，所以无需担心创建多个 CormTable<Entity> 被多次创建的时候，Entity 绑定的表也被多次同步。
 
 ## CURD 具体说明
 ### Select 查询操作
