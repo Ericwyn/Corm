@@ -10,6 +10,38 @@ using CORM.utils;
 
 namespace CORM
 {
+
+    /**
+     * 一个结构体，用来存储当前数据库中已存在的数据表的信息
+     */
+    public class TableMessageStruct
+    {
+        public string TableCatalog { get; set; }
+        public string TableSchema { get; set; }
+        public string TableName { get; set; }
+        public string TableType { get; set; }
+
+        private static readonly string TABLE_TYPE_BASE_TABLE = "BASE TABLE";
+        private static readonly string TABLE_TYPE_VIEW = "VIEW";
+        
+        // 这张表是否是视图表
+        public bool IsView
+        {
+            get
+            {
+                return TableType.Equals(TABLE_TYPE_VIEW);
+            }
+        }
+        
+        // 这张表是否是用户自己创建的表
+        public bool IsBaseTable
+        {
+            get
+            {
+                return TableType.Equals(TABLE_TYPE_BASE_TABLE);
+            }
+        }
+    }
     /**
      * 一个结构体，用来存储表结构中，一个字段的信息
      */
@@ -103,27 +135,37 @@ namespace CORM
             }
         }
 
-        public bool Exist()
+        // 获取当前存在的表的信息
+        private TableMessageStruct GetExistTableMessage()
         {
             using (SqlConnection conn = _corm.NewConnection())
             {
-                var sql = @"select TABLE_NAME from INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='"+_tableName+"';" ;
-                this.SqlLog(sql);
+                var sql = @"select * from INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='"+_tableName+"';" ;
+//                this.SqlLog(sql);
                 SqlCommand sqlCommand = new SqlCommand(sql, conn);
+                TableMessageStruct resTableStruct = null;
                 using (var reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection))
                 {
-                    if (reader.HasRows)
+                    while (reader.Read())
                     {
-                        reader.Close();
-                        return true;
+                        resTableStruct = new TableMessageStruct()
+                        {
+                            TableCatalog = reader["TABLE_CATALOG"].ToString(),
+                            TableSchema = reader["TABLE_SCHEMA"].ToString(),
+                            TableName = reader["TABLE_NAME"].ToString(),
+                            TableType = reader["TABLE_TYPE"].ToString(),
+                        };
+                        break;
                     }
-                    else
-                    {
-                        reader.Close();
-                        return false;
-                    }
+                    reader.Close();
                 }
+                return resTableStruct;
             }
+        }
+
+        public bool Exist()
+        {
+            return GetExistTableMessage() != null;
         }
         
         public CormTransaction BeginTransaction()
@@ -206,10 +248,15 @@ namespace CORM
                 {
                     if (!initAndSyncFlag.Contains(_tableName))
                     {
-                        SqlLog("自动同步 " + _tableName +" 表结构");
-                        if (Exist())
+//                        SqlLog("自动同步 " + _tableName +" 表结构");
+                        TableMessageStruct exitTableMsg = GetExistTableMessage();
+                        if (exitTableMsg != null)
                         {
-                            SyncTableStruct();
+                            // 如果这张表存在，并且是一个基础表而不是视图，才可以自动同步
+                            if (exitTableMsg.IsBaseTable)
+                            {
+                                SyncTableStruct();
+                            }
                         }
                         else
                         {
