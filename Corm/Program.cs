@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Security.Policy;
-using AIC_KWS.Models;
 using CORM.utils;
 using CORM.attrs;
 

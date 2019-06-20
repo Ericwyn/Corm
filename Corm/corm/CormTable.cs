@@ -86,30 +86,25 @@ namespace CORM
 
         public bool Exist()
         {
-            try
+            using (SqlConnection conn = _corm.NewConnection())
             {
-                using (SqlConnection conn = _corm.NewConnection())
+                var sql = @"select TABLE_NAME from INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME='"+_tableName+"';" ;
+                this.SqlLog(sql);
+                SqlCommand sqlCommand = new SqlCommand(sql, conn);
+                using (var reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection))
                 {
-                    var sql = @"SELECT TOP(1) * FROM " + _tableName;
-                    this.SqlLog(sql);
-                    SqlCommand sqlCommand = new SqlCommand(sql, conn);
-                    sqlCommand.ExecuteNonQuery();
-                    return true;
+                    if (reader.HasRows)
+                    {
+                        reader.Close();
+                        return true;
+                    }
+                    else
+                    {
+                        reader.Close();
+                        return false;
+                    }
                 }
             }
-            catch (SqlException e)
-            {
-                if (e.Message.Contains("对象名") && e.Message.Contains("无效"))
-                {
-                    return false;
-                }
-                else
-                {
-                    Console.WriteLine("判断数据表是否存在的时候发生异常 : " + e.Message);
-                    return false;
-                }
-            }
-            
         }
         
         public CormTransaction BeginTransaction()
