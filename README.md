@@ -152,9 +152,9 @@
 
 Corm 的设计思路其实非常的简单，就是 “SQL语句构造器” + “SQL 执行”
 
-其中 MiddleSql 承担的就是 SQL 语句构造器的任务（最后也包含了 SQL 执行，设计上来讲还是觉得 SQL 的执行应该同 MiddleSql 的创建解耦）
+其中各个 MiddleSql 承担的就是 SQL 语句构造器的任务（最后也包含了 SQL 执行，设计上来讲还是觉得 SQL 的执行应该同 Sql 语句的创建解耦）
 
-而其他的例如 Corm\CormTable 以及各种 Utils ，都只是为 SQL 执行提供条件（例如提供 SqlConnect）
+其他的例如 Corm\CormTable 以及各种 Utils ，都只是为 SQL 执行提供条件（例如提供 SqlConnect），而`Table` 和 `Column` 这两个 Attributes 则是为了方便生成 SQL 语句 
 
 ## 核心对象说明
 ### Corm
@@ -172,9 +172,9 @@ Corm 的设计思路其实非常的简单，就是 “SQL语句构造器” + �
     - Customize() --> 创建 CormCustomizeMiddleSql 对象
  
 ### MiddleSql
- - 一个 MiddleSql 完成就是一行 Sql 语句的创建，并执行这个 Sql 语句最终返回结果
- - 因为操作的差异，所以 CURD 增删改查的 Sql 创建操作并不是通用的，所以会区分出 5 类的 MiddleSql
- - 接受并缓存用户对于具体 Sql 操作的设置，例如例如 Select 可以设置 `Top` ，`WhereList` ，`Order By` 这些设置
+ - 一个 MiddleSql 完成的就是一行 Sql 语句的创建，并执行这个 Sql 语句最终返回结果
+ - 因为CURD 增删改查操作的差异，所以 Sql 创建操作并不是通用的，所以会区分出 5 类的 MiddleSql
+ - 接受并缓存用户对于具体 Sql 操作的设置，例如 Select 可以设置 `Top` ，`WhereList` ，`Order By` 这些设置
  - 最后用户调用 Commit 方法的时候，MiddleSql 为用户生成最终的 Sql 语句，并且执行
 
 ### CormTransaction
