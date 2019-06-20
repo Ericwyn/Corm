@@ -8,9 +8,9 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
 # Attribute
 
- - `[CormTable(TableName)]`
+ - `[Table(TableName)]`
 	 - 在 Entity 类上标记数据库的名称
- - `[CormColumn(Name, Size, SqlDbType, NotNull, PrimaryKey)]`
+ - `[Column(Name, Size, SqlDbType, NotNull, PrimaryKey)]`
      - 在 Entity 类的属性当中标记数据库的列
 
 
@@ -46,7 +46,16 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
  - 需要使用可空类型，例如 int?、double?、bool? ，否则 Where 查询会有错误
  - **Entity类的属性都需要将get 和 set 都写为 public**，否则无法使用反射 set 和 get 到具体的 value
-
+ - Attribute 支持的属性如下
+    - `Table`
+        - `TableName` String 类型，描述该表的表名
+    - `Column`
+        - `Name` String 类型，代表字段名称
+        - `Size` int 类型，代表字段长度，非字符类型时候可不设置
+        - `DbType` SqlDbType 类型，代表字段的数据类型
+        - `NotNull` 代表非空，不设置时候默认为 false
+        - `PrimaryKey` 代表主键字段，不设置时候默认为 false
+            
 ### Corm 初始化
 
 Corm 使用一个 Builder 来初始化，示例代码如下
