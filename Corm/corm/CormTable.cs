@@ -10,6 +10,17 @@ using CORM.utils;
 
 namespace CORM
 {
+    /**
+     * 一个结构体，用来存储表结构中，一个字段的信息
+     */
+    public class TableColumnStruct
+    {
+        public string ColumnName { get; set; }
+        public SqlDbType DbType { get; set; }
+        public int? Size { get; set; }
+        public bool NotNull { get; set; }
+    }
+    
     public class CormTable<T> where T : new()
     {
         public Corm _corm { get; }
@@ -116,8 +127,92 @@ namespace CORM
         {
             _corm.LogUtils.SqlPrint(sql);
         }
+        
+        // 获取当前数据表的表结构
+        public List<TableColumnStruct> GetTableStruct()
+        {
+            var columnList = new List<TableColumnStruct>();
+            using (SqlConnection conn = _corm.NewConnection())
+            {
+                var sql = @"select 
+                                COLUMN_NAME,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,IS_NULLABLE  
+                                from INFORMATION_SCHEMA.COLUMNS t where t.TABLE_NAME = '" + _tableName + "'";
+                SqlCommand sqlCommand = new SqlCommand(sql, conn);
+                using (SqlDataReader reader = sqlCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        if (reader["CHARACTER_MAXIMUM_LENGTH"] != null && !reader["CHARACTER_MAXIMUM_LENGTH"].ToString().Equals(""))
+                        {
+                            columnList.Add(new TableColumnStruct()
+                            {
+                                ColumnName = reader["COLUMN_NAME"].ToString(),
+                                DbType = CormUtils<Corm>.parseDbType(reader["DATA_TYPE"].ToString()),
+                                Size = int.Parse(reader["CHARACTER_MAXIMUM_LENGTH"].ToString()),
+                                NotNull = reader["IS_NULLABLE"].ToString().Equals("NO")
+                            }); 
+                        }
+                        else
+                        {
+                            columnList.Add(new TableColumnStruct()
+                            {
+                                ColumnName = reader["COLUMN_NAME"].ToString(),
+                                DbType = CormUtils<Corm>.parseDbType(reader["DATA_TYPE"].ToString()),
+                                NotNull = reader["IS_NULLABLE"].ToString().Equals("NO")
+                            });
+                        }
+                    }
+                }
+            }
 
-        // 获取数据库定义
+            return columnList;
+        }
+
+        // 同步表结构
+        public void SyncTableStruct()
+        {
+            List<TableColumnStruct> oldStructs = GetTableStruct();
+            var oldStructsColumnNameMap = new HashSet<string>();
+            foreach (TableColumnStruct oldStruct in oldStructs)
+            {
+                oldStructsColumnNameMap.Add(oldStruct.ColumnName);
+            }
+            foreach (string newStructColumnName in PropertyMap.Keys)
+            {
+                // 新的字段名不存在与旧的表那里
+                if (!oldStructsColumnNameMap.Contains(newStructColumnName))
+                {
+                    AddColumn(PropertyMap[newStructColumnName]);
+                }
+            }
+            
+            
+        }
+
+        // 在已有的表上面，添加一个新的字段
+        private void AddColumn(PropertyInfo propertyInfo)
+        {
+            using (SqlConnection conn = _corm.NewConnection())
+            {
+                Column attr = propertyInfo.GetCustomAttributes(typeof(Column), true)[0] as Column;
+                StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE ").Append(_tableName).Append(" ADD ");
+                sqlBuilder.Append(attr.Name).Append(" ").Append(attr.DbType.ToString()).Append(" ");
+                if (attr.NotNull)
+                {
+                    sqlBuilder.Append("NOT NULL");
+                }
+                else
+                {
+                    sqlBuilder.Append("NULL");
+                }
+                sqlBuilder.Append(" ;");   
+                SqlLog("表 " + _tableName +" 添加新字段 " + attr.Name +"\n" + sqlBuilder);
+                SqlCommand sqlCommand = new SqlCommand(sqlBuilder.ToString(), conn);
+                sqlCommand.ExecuteNonQuery();
+            }
+        }
+        
+        // 获取建表语句
         public string DDL()
         {
             StringBuilder ddl = new StringBuilder("CREATE TABLE dbo.").Append(_tableName).Append(" ").Append("(").Append(Environment.NewLine);
