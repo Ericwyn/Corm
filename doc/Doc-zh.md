@@ -15,7 +15,7 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 # 使用说明
  - [快速开始](#快速开始)
      - [Entity 类创建](#entity-类创建)
-     - [使用 Corm 完成数据库操作](##使用-corm-完成数据库操作)
+     - [使用 Corm 完成数据库操作](#使用-corm-完成数据库操作)
  - [数据表维护](#数据表维护)
      - [数据表创建/删除](#数据表维护)
  - [CURD 具体说明](#curd-具体说明)
