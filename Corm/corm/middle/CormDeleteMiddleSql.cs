@@ -18,6 +18,11 @@ namespace CORM
         private T whereObj;
         private bool deleteAllFlag = false;
         
+        // 自定义 WhereQuery 查询语句
+        private string cusWhereQuery = null;
+        // 自定义 WhereQuery 查询的参数
+        private SqlParameter[] cusWhereQueryParams; 
+        
         public CormDeleteMiddleSql(CormTable<T> cormTable)
         {
             this._cormTable = cormTable;
@@ -27,10 +32,42 @@ namespace CORM
 
         public CormDeleteMiddleSql<T> Where(T obj)
         {
+            
+            if (cusWhereQuery != null && !cusWhereQuery.Equals(""))
+            {
+                throw new CormException("DELETE 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
+            }
             this.whereObj = obj;
             return this;
         }
+        
+        public CormDeleteMiddleSql<T> WhereQuery(string query)
+        {
+            return WhereQuery(query, null);
+        }
+        
+        // 自定义 Where 查询
+        // 该方法不能和 Where 方法同时使用
+        // query 是自定义的 where 语句，例如  "and a > b" , "or a < 10" 之类的
+        // parameters 是自定义 where 语句的参数
+        public CormDeleteMiddleSql<T> WhereQuery(string query, SqlParameter[] parameters)
+        {
+            if (whereObj != null)
+            {
+                throw new CormException("DELETE 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
+            }
+            if (parameters != null && parameters.Length > 0)
+            {
+                cusWhereQueryParams = parameters;
+            }
 
+            if (query != null && !query.Equals(""))
+            {
+                cusWhereQuery = query;
+            }
+            return this;
+        }
+        
         public CormDeleteMiddleSql<T> All()
         {
             deleteAllFlag = true;
@@ -52,19 +89,21 @@ namespace CORM
             sqlBuilder.Append(this.tableName);
             sqlBuilder.Append(" ");
 
-            // 既没有使用 All() 方法也没有使用 Where() 方法，抛出异常提示用户
-            if (whereObj == null && !deleteAllFlag)
+            // 既没有使用 All() 方法也没有使用 Where() 方法 也没有使用 WhereQuery 方法，抛出异常提示用户
+            if (whereObj == null && !deleteAllFlag && (cusWhereQuery == null || cusWhereQuery.Trim().Equals("")))
             {
                 throw new CormException("DELETE 需要指定删除范围，请使用 All() 方法或者 Where() 方法");
             }
             else
             {
-                if (whereObj == null && deleteAllFlag)
+                // 先判断 All 条件, all flag 为 true ，另外两个方法未被调用
+                if (whereObj == null && deleteAllFlag && cusWhereQuery == null)
                 {
                     // All 条件
                     sqlBuilder.Append(" ;");
                 }
-                else if (whereObj != null && !deleteAllFlag)
+                // 只调用了 whereObj 方法
+                else if (whereObj != null && !deleteAllFlag && (cusWhereQuery == null || cusWhereQuery.Trim().Equals("")))
                 {
                     // Query 条件
                     var whereQuery = GetWhereQuery(whereObj);
@@ -78,9 +117,14 @@ namespace CORM
                         sqlBuilder.Append(" ;");
                     }
                 }
+                // 只调用了 WhereQuery 方法
+                else if (cusWhereQuery != null && !cusWhereQuery.Trim().Equals("") && whereObj == null && !deleteAllFlag)
+                {
+                    sqlBuilder.Append(" WHERE ").Append(cusWhereQuery).Append(" ;");
+                }
                 else
                 {
-                    throw new CormException("DELETE 时候 All() 和 Where() 不能同时使用");
+                    throw new CormException("DELETE 操作时候，请仅使用 Where/ WhereQuery/ All 方法中的一个，来限定删除范围");
                 }
             }
             
@@ -88,7 +132,7 @@ namespace CORM
             this._cormTable.SqlLog(sql);            
             List<SqlParameter> paramList = new List<SqlParameter>(); 
             var properties = typeof(T).GetProperties();
-            if (sql.Contains("WHERE "))
+            if (whereObj != null && sql.Contains("WHERE "))
             {
                 foreach (string key in PropertyMap.Keys)
                 {
@@ -102,6 +146,9 @@ namespace CORM
                         paramList.Add(param);
                     }
                 }
+            } else if (cusWhereQueryParams != null && cusWhereQueryParams.Length != 0)
+            {
+                paramList.AddRange(cusWhereQueryParams);
             }
 
             if (transaction != null)
