@@ -6,7 +6,7 @@ Corm 是一个 C# 简易 orm 框架, 支持 SqlServer
 支持 Entity 类创建，并根据 Entity 类自动建表及维护数据库表结构，针对诸多单表 SQL 操作进行了封装，还支持使用自定义 SQL 语句执行更加复杂的 SQL 操作，并且所有的 Corm 操作都支持 SQL 事务操作。
 
 
- - 源码地址 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
+ - 源码地址 : [github.com/Ericwyn/Corm](https://github.com/Ericwyn/Corm)
  - 在线文档地址(最新文档)：[ericwyn.github.io/Corm/docs/Doc-zh.md](ericwyn.github.io/Corm/docs/Doc-zh.md)
 
 
