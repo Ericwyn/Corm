@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using CORM.utils;
 
@@ -71,15 +72,27 @@ namespace CORM
         public void Commit()
         {
             this._transaction.Commit();
+            if(_sqlConnection.State == ConnectionState.Open)  
+            {  
+                _sqlConnection.Close();  
+            }          
         }
 
         public void Rollback()
         {
             this._transaction.Rollback();
+            if(_sqlConnection.State == ConnectionState.Open)  
+            {  
+                _sqlConnection.Close();  
+            } 
         }
         
         public void Dispose()
         {
+            if(_sqlConnection.State == ConnectionState.Open)  
+            {  
+                _sqlConnection.Close();  
+            } 
             _sqlConnection?.Dispose();
             _transaction?.Dispose();
         }
