@@ -82,7 +82,7 @@ namespace CORM
             {
                 throw new CormException("SELECT 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
             }
-            if (parameters.Length > 0)
+            if (parameters != null && parameters.Length > 0)
             {
                 cusWhereQueryParams = parameters;
             }
