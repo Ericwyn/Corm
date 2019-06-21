@@ -27,6 +27,11 @@ namespace CORM
         // 设置更新成什么样的数据
         private T updateObj;
         
+        // 自定义 WhereQuery 查询语句
+        private string cusWhereQuery = null;
+        // 自定义 WhereQuery 查询的参数
+        private SqlParameter[] cusWhereQueryParams; 
+        
         public CormUpdateMiddleSql(CormTable<T> cormTable)
         {
             this._cormTable = cormTable;
@@ -39,7 +44,38 @@ namespace CORM
             this.whereObj = obj;
             return this;
         }
+        
+        public CormUpdateMiddleSql<T> WhereQuery(string query)
+        {
+            if (cusWhereQuery != null && !cusWhereQuery.Equals(""))
+            {
+                throw new CormException("UPDATE 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
+            }
+            return WhereQuery(query, null);
+        }
+        
+        // 自定义 Where 查询
+        // 该方法不能和 Where 方法同时使用
+        // query 是自定义的 where 语句，例如  "and a > b" , "or a < 10" 之类的
+        // parameters 是自定义 where 语句的参数
+        public CormUpdateMiddleSql<T> WhereQuery(string query, SqlParameter[] parameters)
+        {
+            if (whereObj != null)
+            {
+                throw new CormException("UPDATE 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
+            }
+            if (parameters != null && parameters.Length > 0)
+            {
+                cusWhereQueryParams = parameters;
+            }
 
+            if (query != null && !query.Equals(""))
+            {
+                cusWhereQuery = query;
+            }
+            return this;
+        }
+        
         public CormUpdateMiddleSql<T> Value(T obj)
         {
             this.updateObj = obj;
@@ -54,7 +90,7 @@ namespace CORM
         public int Commit(CormTransaction transaction)
         {
             int resUpdateSize = -1;
-            if (updateObj == null || whereObj == null)
+            if (updateObj == null || (whereObj == null && cusWhereQuery == null))
             {
                 throw new Exception("Update 操作需要指定 Update 的条件以及替换的 Value，请同时调用 Where() 和 Value() 方法");
             }
@@ -70,7 +106,13 @@ namespace CORM
             sqlBuilder.Append(" \n");
             sqlBuilder.Append(GetValueQuery(updateObj));
             sqlBuilder.Append(" ");
-            sqlBuilder.Append(GetWhereQuery(whereObj));
+            if (whereObj != null)
+            {
+                sqlBuilder.Append(GetWhereQuery(whereObj));
+            } else if (cusWhereQuery != null)
+            {
+                sqlBuilder.Append(" WHERE ").Append(cusWhereQuery);
+            }
             sqlBuilder.Append(" ;");
 
             var sql = sqlBuilder.ToString();
@@ -88,24 +130,30 @@ namespace CORM
                     {
                         continue;
                     }
-                    if (sql.Contains("@" + attr.Name + flagForOldValue +" "))
+                    
+                    // 如果是以 Where 方法来设定更新条件的话
+                    if (whereObj != null)
                     {
-                        var param = new SqlParameter();
-                        // 创建 param 以填充 sqlBuff 当中的占位符
-                        param = new SqlParameter("@" + attr.Name + flagForOldValue, attr.DbType, attr.Size);
-                        var value = property.GetValue(whereObj);
-                        // 如果这个属性存在的话
-                        if (value != null)
+                        // 拼接旧的参数， Where 语句
+                        if (sql.Contains("@" + attr.Name + flagForOldValue +" "))
                         {
-                            param.Value = value;
+                            var param = new SqlParameter();
+                            // 创建 param 以填充 sqlBuff 当中的占位符
+                            param = new SqlParameter("@" + attr.Name + flagForOldValue, attr.DbType, attr.Size);
+                            var value = property.GetValue(whereObj);
+                            // 如果这个属性存在的话
+                            if (value != null)
+                            {
+                                param.Value = value;
+                            }
+                            else
+                            {
+                                throw new CormException("UPDATE 操作当中，WHERE 语句拼接错误 --> 参数名:" + attr.Name);
+                            }
+                            paramList.Add(param);
                         }
-                        else
-                        {
-                            throw new CormException("UPDATE 操作当中，WHERE 语句拼接错误 --> 参数名:" + attr.Name);
-                        }
-                        paramList.Add(param);
                     }
-
+                    // 拼接新的参数， Value 语句
                     if (sql.Contains("@" + attr.Name + flagForValueQuery +" "))
                     {
                         var param = new SqlParameter();
@@ -123,6 +171,15 @@ namespace CORM
                         }
                         paramList.Add(param);
                     }
+                }
+            }
+
+            // 如果是以 WhereQuery 方法来设定更新条件的话
+            if (cusWhereQueryParams != null && cusWhereQueryParams.Length > 0)
+            {
+                foreach (SqlParameter parameter in cusWhereQueryParams)
+                {
+                    paramList.Add(parameter);
                 }
             }
             
@@ -150,9 +207,9 @@ namespace CORM
         }
         
         /*
-         * 得到 where 语句 <column_name> = @<column_name>OLD
+         * 得到 where 语句 <column_name> = @<column_name>_OLD_
          */
-        private static string flagForOldValue = "OLD";
+        private static string flagForOldValue = "_OLD_";
         private static string GetWhereQuery(T obj)
         {
             if (obj == null){
@@ -186,9 +243,9 @@ namespace CORM
         }
         
         /*
-         * 得到 update 语句，  <column_name> = @<column_name>VALUE
+         * 得到 update 语句，  <column_name> = @<column_name>_VALUE_
          */
-        private static string flagForValueQuery = "VALUE";
+        private static string flagForValueQuery = "_VALUE_";
         private static string GetValueQuery(T obj)
         {
             if (obj == null){
