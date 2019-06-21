@@ -3,7 +3,7 @@
 
 支持自动维护数据库表结构，具体可查看 [自动维护表结构-说明](#自动维护表结构)
 
- - 文档： [中文文档](doc/Doc-zh.md)
+ - 文档： [中文文档](https://ericwyn.github.io/Corm/docs/Doc-zh.html)
  - 代码示例： [CormTest-Program](Corm/Program.cs)
 
 # 原理
