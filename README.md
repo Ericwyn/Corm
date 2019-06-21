@@ -4,7 +4,7 @@
 支持自动维护数据库表结构，具体可查看 [自动维护表结构-说明](#自动维护表结构)
 
  - 文档： [中文文档](https://ericwyn.github.io/Corm/docs/Doc-zh.html)
- - 代码示例： [CormTest-Program](Corm/Program.cs)
+ - 代码示例： [CormTest-Program](https://github.com/Ericwyn/Corm/blob/master/Corm/Program.cs)
 
 # 原理
 
@@ -53,6 +53,9 @@
     更新操作
  
    - Where(T whereObj)
+   - WhereQuery(string query)
+   - WhereQuery(string query, SqlParameter[] parameters)
+     - 自定义 Where 条件语句和参数   
    - Value(T obj)
    - Commit()
    - Commit(CormTransaction trans)
@@ -63,6 +66,9 @@
     
    - Where(T whereObj)
    - All()
+   - WhereQuery(string query)
+   - WhereQuery(string query, SqlParameter[] parameters)
+     - 自定义 Where 条件语句和参数   
    - Commit()
    - Commit(CormTransaction trans)
 

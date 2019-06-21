@@ -9,8 +9,6 @@ Corm 是一个 C# 简易 orm 框架, 支持 SqlServer
  - 源码地址 : [github.com/Ericwyn/Corm](https://github.com/Ericwyn/Corm)
  - 在线文档地址(最新文档)：[ericwyn.github.io/Corm/docs/Doc-zh.md](ericwyn.github.io/Corm/docs/Doc-zh.md)
 
-
-
 # 使用说明
  - [快速开始](#快速开始)
      - [Attribute说明](#Attribute)
@@ -169,7 +167,7 @@ Builder 支持以下方法
 
  - 复杂 Where 查询
  
-    为了是 Where 查询获得更高的自由度，包括多条件的 AND/OR 查询，以及对 `<`, `>`, `LIKE` 这些条件符号提供支持， Corm 支持自定义使用`WhereQuery()` 方法设定更加复杂的 Where 查询语句及参数
+    为了使得 Where 查询获得更高的自由度，包括多条件的 AND/OR 查询，以及对 `<`, `>`, `LIKE` 这些条件符号提供支持， Corm 支持自定义使用`WhereQuery()` 方法设定更加复杂的 Where 查询语句及参数
     
     `WhereQuery()` 方法接受两个参数，第一个参数是 Where 条件语句，第二个是一个 SqlParameter 数组，参数二可为空
   
@@ -247,19 +245,29 @@ Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 Lis
         
 ### Update 操作
 
-Update 使用 Where() 方法设置需要 Update 的条件，使用 Value() 方法设置更新之后的值
+ - Update 使用 Where() 方法设置需要 Update 的条件，使用 Value() 方法设置更新之后的值
 
-下面的代码展示如何将所有 studentName 为 “testtest” 的行，更新他们的 studentAge 为 20
+    下面的代码展示如何将所有 studentName 为 “testtest” 的行，更新他们的 studentAge 为 20
 
-    studentTable.Update().Where(new Student()
-    {
-        studentName = "testtest",
-    })
-    .Value(new Student()
-    {
-        studentAge = 20,
-    })
-    .Commit();
+        studentTable.Update().Where(new Student()
+        {
+            studentName = "testtest",
+        })
+        .Value(new Student()
+        {
+            studentAge = 20,
+        })
+        .Commit();
+
+ - 更加复杂的 Where 操作可以使用 `WhereQuery()` 方法进行设置，`WhereQuery()` 的相关说明请参照上文 Select 操作中的相关说明
+
+        // 使用 WhereQuery 设置 UPDATE 条件
+        // UPDATE Student SET studentSex_='男' WHERE studentName_ like '%name%' and studentAge_ > 2 ;
+        studentTable.Update().WhereQuery("studentName_ like @NameQuery and studentAge_ > @StudentAge ", new []
+        {
+            new SqlParameter("NameQuery", "%name%"),
+            new SqlParameter("StudentAge", 2), 
+        }).Value( new Student(){studentSex = "男"} ).Commit();
 
 ### Delete 操作
 
@@ -278,6 +286,15 @@ Delete 操作可选择删除表中全部数据，或按照特定条件删除
             studentAge = 20, 
         }).Commit();
 
+ - 更加复杂的 Where 操作可以使用 `WhereQuery()` 方法进行设置，`WhereQuery()` 的相关说明请参照上文 Select 操作中的相关说明
+
+        // 使用 WhereQuery 设置 DELETE 条件
+        // DELETE FROM Student  WHERE studentAge_ > 20 ; 
+        studentTable.Delete().WhereQuery("studentAge_ > @StudentAge", new[]
+        {
+            new SqlParameter("StudentAge", 20),
+        }).Commit();
+        
 ### 自定义 SQL 语句操作
 
 Corm 支持自定义 SQL 语句操作，使用 Customize() 方法可以创建一个 CormCustomizeMiddleSql 对象，该对象主要有以下方法
