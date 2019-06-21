@@ -126,15 +126,18 @@ namespace CORM
                 }
                 else
                 {
-                    sqlCommand = new SqlCommand(customizeSqlBuff, this._cormTable._corm.NewConnection());
-                    if (customizeSqlParamList != null && customizeSqlParamList.Count > 0)
+                    using (SqlConnection conn = this._cormTable._corm.NewConnection())
                     {
-                        foreach (SqlParameter param in customizeSqlParamList)
+                        sqlCommand = new SqlCommand(customizeSqlBuff, conn);
+                        if (customizeSqlParamList != null && customizeSqlParamList.Count > 0)
                         {
-                            sqlCommand.Parameters.Add(param);
+                            foreach (SqlParameter param in customizeSqlParamList)
+                            {
+                                sqlCommand.Parameters.Add(param);
+                            }
                         }
+                        reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
                     }
-                    reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
                 }
                 return reader;
             }

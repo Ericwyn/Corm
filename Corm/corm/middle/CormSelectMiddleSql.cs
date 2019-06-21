@@ -210,12 +210,15 @@ namespace CORM
             }
             else
             {
-                sqlCommand = new SqlCommand(sql, this._cormTable._corm.NewConnection());
-                foreach (SqlParameter param in paramList)
+                using (SqlConnection conn = _cormTable._corm.NewConnection())
                 {
-                    sqlCommand.Parameters.Add(param);
+                    sqlCommand = new SqlCommand(sql, conn);
+                    foreach (SqlParameter param in paramList)
+                    {
+                        sqlCommand.Parameters.Add(param);
+                    }
+                    reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
                 }
-                reader = sqlCommand.ExecuteReader(CommandBehavior.CloseConnection);
             }
             return reader;
         }
