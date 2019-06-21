@@ -90,7 +90,7 @@ namespace CORM
             // SELECT 按 where 条件查询
             var st = new Student();
             st.studentAge = 10;
-            list = studentTable.Find().Where(st).Commit();*/
+            list = studentTable.Find().Where(st).Commit();
             // 自定义 Where 查询
             //SELECT * FROM Student WHERE studentName_ like '%me%' and studentAge_ > @StudentAge  ;
             list = studentTable.Find().WhereQuery("studentName_ like '%me%' and studentAge_ > @StudentAge", new[]
@@ -99,9 +99,6 @@ namespace CORM
             }).Commit();
             Console.WriteLine(list.Count);
             
-            
-            
-            /*
             // SELECT 查询特定的属性
             list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
@@ -166,6 +163,15 @@ namespace CORM
                 studentAge = 20,
             })
             .Commit();
+            
+            // 使用 WhereQuery 设置 UPDATE 条件
+            // UPDATE Student SET studentSex_='男' WHERE studentName_ like '%name%' and studentAge_ > 2 ;
+            studentTable.Update().WhereQuery("studentName_ like @NameQuery and studentAge_ > @StudentAge ", new []
+            {
+                new SqlParameter("NameQuery", "%name%"),
+                new SqlParameter("StudentAge", 2), 
+            }).Value( new Student(){studentSex = "男"} ).Commit();
+            
             */
 
             /*
@@ -183,6 +189,13 @@ namespace CORM
             {
                 studentName = "testtest", 
                 studentAge = 20, 
+            }).Commit();
+            
+            // 使用 WhereQuery 设置 DELETE 条件
+            // DELETE FROM Student  WHERE studentAge_ > 20 ; 
+            studentTable.Delete().WhereQuery("studentAge_ > @StudentAge", new[]
+            {
+                new SqlParameter("StudentAge", 20),
             }).Commit();
             */
 
