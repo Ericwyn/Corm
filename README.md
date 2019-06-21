@@ -26,8 +26,9 @@
       - 只查询特定字段
     - Where(T whereObj)
       - Where 条件查询
-    - WhereLike(string colunmnName, string likeQuery)
-      - Like 条件查询
+    - WhereQuery(string query)
+    - WhereQuery(string query, SqlParameter[] parameters)
+      - 自定义 Where 条件语句和参数
     - OrderBy(string[] atts)
     - OrderDescBy(string[] atts)
       - Order By 条件设置, 多个条件使用 and 连接

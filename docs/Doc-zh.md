@@ -29,7 +29,6 @@ Corm 是一个 C# 简易 orm 框架, 支持 SqlServer
         - 查询首条数据
         - 判断 Select 查询的数据是否为空
         - Order By ASC | DESC
-        - Like 查询
      - [Insert 插入操作](#insert-操作)
         - Insert 一条数据
         - Insert 多条数据
@@ -166,6 +165,25 @@ Builder 支持以下方法
         selectTemp.studentName = "aaa";
         List<Student> list = studentTable.Find().Where(selectTemp).Commit();
  
+    更加复杂的一些 Where 条件查询，可以使用下面提到 WhereQuery 方法
+
+ - 复杂 Where 查询
+ 
+    为了是 Where 查询获得更高的自由度，包括多条件的 AND/OR 查询，以及对 `<`, `>`, `LIKE` 这些条件符号提供支持， Corm 支持自定义使用`WhereQuery()` 方法设定更加复杂的 Where 查询语句及参数
+    
+    `WhereQuery()` 方法接受两个参数，第一个参数是 Where 条件语句，第二个是一个 SqlParameter 数组，参数二可为空
+  
+    示例代码如下
+        
+        // SELECT * FROM Student WHERE studentName_ like '%me%' and studentAge_ > 5  ;
+        list = studentTable.Find().WhereQuery("studentName_ like '%me%' and studentAge_ > @StudentAge", new[]
+        {
+            new SqlParameter("@StudentAge", 5),
+        }).Commit();
+        Console.WriteLine(list.Count);
+ 
+    **注意：WhereQuery 方法和 Where 方法不可同时使用**
+
  - 设定需要查询的字段
         
         List<Student> list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
@@ -196,27 +214,6 @@ Builder 支持以下方法
         var list = studentTable.Find().OrderBy(new string[] {"age"}).Commit();
         // Order By DESC 排序
         list = studentTable.Find().OrderDescBy(new string[] {"age"}).Commit();
- 
- - Like 查询
-    
-    Corm 支持简单的 Like 查询，只需要调用 WhereLike 方法就可以了，接受两个参数
-     - 第一个参数是 column Name
-     - 第二个参数是具体的 Like 的内容
-     - 例如使用 `.WhereLike("studentName_", "test")` 将会在 Sql 语句当中拼接 `studentName_ LIKE '%test%'`
-     - WhereLike 方法可多次调用，拼接的语句会使用 AND 进行连接
-     
-     示例代码如下
-     
-         // SELECT Like 查询
-         // 将会使用 LIKE 语句如下
-         // 
-         //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
-         //
-         var list = studentTable.Find()
-             .WhereLike("studentName_", "test")
-             .WhereLike("studentAge_", "2")
-             .Commit();
-         Console.WriteLine(list.Count);
  
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
