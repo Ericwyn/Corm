@@ -41,16 +41,16 @@ namespace CORM
 
         public CormUpdateMiddleSql<T> Where(T obj)
         {
+            if (cusWhereQuery != null && !cusWhereQuery.Equals(""))
+            {
+                throw new CormException("UPDATE 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
+            }
             this.whereObj = obj;
             return this;
         }
         
         public CormUpdateMiddleSql<T> WhereQuery(string query)
         {
-            if (cusWhereQuery != null && !cusWhereQuery.Equals(""))
-            {
-                throw new CormException("UPDATE 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
-            }
             return WhereQuery(query, null);
         }
         
@@ -96,7 +96,7 @@ namespace CORM
             }
             var valueQuery = GetValueQuery(updateObj);
             var whereQuery = GetWhereQuery(whereObj);
-            if (valueQuery.Trim().Equals("") || whereQuery.Trim().Equals(""))
+            if (valueQuery.Trim().Equals("") || (whereQuery.Trim().Equals("") && cusWhereQuery.Trim().Equals("")))
             {
                 throw new Exception("WHERE 条件或 SET 条件为空");
             }
