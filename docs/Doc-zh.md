@@ -1,21 +1,19 @@
 
-# Corm 前言
-一个 C# 简易 orm 框架, 支持 SqlServer
+# Corm 中文文档
+# 前言
+Corm 是一个 C# 简易 orm 框架, 支持 SqlServer
 
-不支持自动维护数据库表结构，使用的时候，一般是先设计好数据库，之后依据数据库的表结构创建 Entity 类
+支持 Entity 类创建，并根据 Entity 类自动建表及维护数据库表结构，针对诸多单表 SQL 操作进行了封装，还支持使用自定义 SQL 语句执行更加复杂的 SQL 操作，并且所有的 Corm 操作都支持 SQL 事务操作。
 
-Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
 
-# Attribute
+ - 源码地址 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
+ - 在线文档地址(最新文档)：[ericwyn.github.io/Corm/docs/Doc-zh.md](ericwyn.github.io/Corm/docs/Doc-zh.md)
 
- - `[Table(TableName)]`
-	 - 在 Entity 类上标记数据库的名称
- - `[Column(Name, Size, SqlDbType, NotNull, PrimaryKey)]`
-     - 在 Entity 类的属性当中标记数据库的列
 
 
 # 使用说明
  - [快速开始](#快速开始)
+     - [Attribute说明](#Attribute)
      - [Entity 类创建](#entity-类创建)
      - [Corm 初始化](#corm-初始化)
      - [使用 Corm 完成数据库操作](#使用-corm-完成数据库操作)
@@ -23,16 +21,44 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
      - [删除/创建/判断是否存在](#删除创建判断是否存在)
      - [自动维护表结构](#自动维护表结构)
  - [CURD 具体说明](#curd-具体说明)
-     - [Select](#select-查询操作)
-     - [Insert](#insert-操作)
-     - [Update](#update-操作)
-     - [Delete](#delete-操作)
+     - [Select 查询操作](#select-查询操作)
+        - Find All
+        - 带 Where 的查询
+        - 查询特定的字段
+        - 只查询前 n 条数据
+        - 查询首条数据
+        - 判断 Select 查询的数据是否为空
+        - Order By ASC | DESC
+        - Like 查询
+     - [Insert 插入操作](#insert-操作)
+        - Insert 一条数据
+        - Insert 多条数据
+     - [Update 更新操作](#update-操作)
+     - [Delete 删除操作](#delete-操作)
+        - 删除全部数据
+        - 按照特定条件删除
      - [自定义 SQL 语句操作](#自定义-sql-语句操作)
      - [SqlDataReader 解析](#自定义对-sqldatareader-的解析)
  - [事务的支持](#事务的支持)
  - [其他工具](#其他工具)
+ - [TODO](#TODO)
 
 ## 快速开始
+
+# Attribute
+Corm 支持以下 `Attribute` 支持的属性如下
+
+- `[Table(TableName)]`
+    - 在 Entity 类上标记数据库的名称
+    - `TableName` String 类型，描述该表的表名
+- `[Column(Name, Size, SqlDbType, NotNull, PrimaryKey)]`
+    - 在 Entity 类的属性当中标记数据库的列
+    - `Name` String 类型，代表字段名称
+    - `Size` int 类型，代表字段长度，非字符类型时候可不设置
+    - `DbType` SqlDbType 类型，代表字段的数据类型
+    - `NotNull` 代表非空，不设置时候默认为 false
+    - `PrimaryKey` 代表主键字段，不设置时候默认为 false
+
 ### Entity 类创建
     
     [Table(TableName = "Student")]
@@ -44,17 +70,18 @@ Github地址为 : [github.com/Ericwyn/Corm](github.com/Ericwyn/Corm)
         public int? studentAge { get; set; }
     }
 
- - 需要使用可空类型，例如 int?、double?、bool? ，否则 Where 查询会有错误
+ - 需要使用可空类型，例如 int?、double?、bool? 、DateTime? TimeSpan?，否则 Where 查询会有错误
  - **Entity类的属性都需要将get 和 set 都写为 public**，否则无法使用反射 set 和 get 到具体的 value
- - Attribute 支持的属性如下
-    - `Table`
-        - `TableName` String 类型，描述该表的表名
-    - `Column`
-        - `Name` String 类型，代表字段名称
-        - `Size` int 类型，代表字段长度，非字符类型时候可不设置
-        - `DbType` SqlDbType 类型，代表字段的数据类型
-        - `NotNull` 代表非空，不设置时候默认为 false
-        - `PrimaryKey` 代表主键字段，不设置时候默认为 false
+ - 常用类型请设置成以下的 `SqlDbType`
+    
+    | C# | SqlDbType |
+    | ------ | ------ |
+    | int? | SqlDbType.Int |
+    | string | SqlDbType.VarChar |
+    | DateTime? | SqlDbType.DateTime |
+    | DateTime? | SqlDbType.Date |
+    | TimeSpan? | SqlDbType.Time |
+    | ...   | ... |
             
 ### Corm 初始化
 
@@ -145,8 +172,6 @@ Builder 支持以下方法
 
  - 只查询前 n 条，可使用 Top(n) 方法进行限定
     
-    此处命名可能会有误解，**`All()` 方法指的字段的 All ，而此处的 Top n 指的是查询行数** 
-
         List<Student> list = studentTable.Find().Top(1).Commit();
  
  - 查询首条数据
@@ -155,7 +180,7 @@ Builder 支持以下方法
     
         Student = studentTable.Find().CommitForOne();
   
- - 判断Select 能否查询到数据
+ - 判断 Select 查询的数据是否为空
     
     也是因为比较常用所以进行封装，先使用 CommitForReader 获得 reader，然后返回 reader.HasRows ;
         
@@ -192,31 +217,6 @@ Builder 支持以下方法
              .WhereLike("studentAge_", "2")
              .Commit();
          Console.WriteLine(list.Count);
- 
- - 手写 Sql 语句进行查询
- 
-    Corm 支持传入手写的 Sql 语句进行查询，也会自动解析成 Entity 类的 List，并且也提供了事务的支持，可使用以下两个方法
-        
-    - `Customize(string sqlStr)`
-        - 可传入拼接的 Sql
-    - `Customize(string sqlStr, SqlParameter[] parameters)`
-        - 传入预编译语句以及需要替换的参数
-    
-    示例代码如下
-    
-        // SELECT 自定义查询语句
-        var list = studentTable.Customize().SQL(
-        "SELECT * FROM Student WHERE studentName_=@studentName_",
-        new SqlParameter[]
-        {
-            new SqlParameter("@studentName_", "test3"),
-        })
-        .Commit();     // 如需要使用事务的话可在此处传入 SqlTransaction 对象
-        Console.WriteLine(list);
- 
- - 更加原生的使用，可以使用 `CommitForReader()` 方法，配合 `Customize()` 和 `SqlDataReaderParse<T>.parse()`方法，传入自定义 Sql 语句，而后由用户自己对返回的 SqlDataReader 进行读取和解析
-    - `CommitForReader()` 方法同样支持事务操作
-
  
 ### Insert 操作
 Insert 方法使用 Value 传入需要插入的值，可为一个 Entity 的 List 或者一个单独的 Entity 对象
@@ -388,3 +388,13 @@ CormUtils 封装了一些方法，用以更好的使用 Corm 框架
         
         Console.WriteLine(CormUtils<Student>.GetTableName());
         Console.WriteLine(CormUtils<Student>.GetProPropertyInfoMap().Count);
+
+## TODO 
+Corm 使用较为暴力的方法，针对“手写 SQL 并使用原生 C# SqlConnect 进行操作”的方式进行了封装，虽然提升了编码效率但是并没有提升 SQL 操作的效率，而且还因为使用了反射的操作，序列化 SqlDataReader 存在天生的性能缺陷，以下是整个 Corm 可能进行改进的地方
+
+ - 数据库连接池？
+ - 使用更高效的 SqlDataReader 序列化方法
+ - 使用 SQL 语句构造树替代
+ - JOIN 查询
+ - 主键外键支持
+ - ......
