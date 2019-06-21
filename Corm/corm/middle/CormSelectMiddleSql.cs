@@ -20,7 +20,8 @@ namespace CORM
         // 缓存该类型的列名，避免经常反射
         private Dictionary<string, PropertyInfo> PropertyMap;
         
-                private T whereObj;
+        // 用以设置 where 条件的 obj
+        private T whereObj;
         // 查找的属性
         private string attributes = "*";
 
@@ -30,8 +31,10 @@ namespace CORM
         private string[] orderByAttributes = {};
         private string[] orderDescByAttributes = {};
         
-        // like 查询
-        private List<LikeQueryStruct> likeQueryList;
+        // 自定义 WhereQuery 查询语句
+        private string cusWhereQuery = null;
+        // 自定义 WhereQuery 查询的参数
+        private SqlParameter[] cusWhereQueryParams; 
         
         public CormSelectMiddleSql(CormTable<T> cormTable)
         {
@@ -55,22 +58,39 @@ namespace CORM
         // Where 查询
         public CormSelectMiddleSql<T> Where(T set)
         {
+            if (cusWhereQuery != null && !cusWhereQuery.Equals(""))
+            {
+                throw new CormException("SELECT 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
+            }
             this.whereObj = set;
             return this;
         }
         
-        // Like 查询, 字符串 Like
-        public CormSelectMiddleSql<T> WhereLike(string columnName, string likeStr)
+        
+        public CormSelectMiddleSql<T> WhereQuery(string query)
         {
-            if (likeQueryList == null)
+            return WhereQuery(query, null);
+        }
+        
+        // 自定义 Where 查询
+        // 该方法不能和 Where 方法同时使用
+        // query 是自定义的 where 语句，例如  "and a > b" , "or a < 10" 之类的
+        // parameters 是自定义 where 语句的参数
+        public CormSelectMiddleSql<T> WhereQuery(string query, SqlParameter[] parameters)
+        {
+            if (whereObj != null)
             {
-                likeQueryList = new List<LikeQueryStruct>();
+                throw new CormException("SELECT 操作中, Where() 方法和 WhereQuery() 方法不可同时使用");
             }
-            likeQueryList.Add(new LikeQueryStruct()
+            if (parameters.Length > 0)
             {
-                column = columnName,
-                query = likeStr,
-            });
+                cusWhereQueryParams = parameters;
+            }
+
+            if (query != null && !query.Equals(""))
+            {
+                cusWhereQuery = query;
+            }
             return this;
         }
 
@@ -155,40 +175,25 @@ namespace CORM
             // 拼接 Where 语句
             // "\n" + GetWhereQuery(this.whereObj) + " "
             sqlBuilder.Append("\n");
-            sqlBuilder.Append(GetWhereQuery(this.whereObj));
-            sqlBuilder.Append(" ");
-
-            // 拼接 LIKE 字符串语句
-            var whereLikeQUery = GetWhereLikeQuery(this.likeQueryList);
-            if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
+            // 拼接 WhereObj 得到的 Where 语句
+            if (whereObj != null)
             {
-                if (sqlBuilder.ToString().Contains("WHERE"))
-                {
-                    sqlBuilder.Append(" AND ");
-                    sqlBuilder.Append(whereLikeQUery);
-                }
-                else
-                {
-                    sqlBuilder.Append(" WHERE ");
-                    sqlBuilder.Append(whereLikeQUery);
-                }
-
+                sqlBuilder.Append(GetWhereQuery(this.whereObj)); 
             }
-            
+            // 拼接用户自定义的 WhereQuery
+            else if (cusWhereQuery != null && !cusWhereQuery.Equals(""))
+            {
+                sqlBuilder.Append(" WHERE ").Append(cusWhereQuery);
+            }
+            sqlBuilder.Append(" ");
+ 
             sqlBuilder.Append(GetOrderQuery(this.orderByAttributes, this.orderDescByAttributes));
             // 拼接 ";"
             sqlBuilder.Append(" ;");
             List<SqlParameter> paramList = new List<SqlParameter>();
-            if (whereLikeQUery != null && !whereLikeQUery.Trim().Equals(""))
-            {
-                foreach (var parameter in GetWhereLikeParam(likeQueryList))
-                {
-                    paramList.Add(parameter);
-                }
-            }
 
             var sql = sqlBuilder.ToString();
-            if (sql.Contains("WHERE "))
+            if (this.whereObj != null && sql.Contains("WHERE "))
             {
                 foreach (string key in PropertyMap.Keys)
                 {
@@ -203,6 +208,15 @@ namespace CORM
                     }
                 }
             }
+
+            if (cusWhereQueryParams != null)
+            {
+                foreach (SqlParameter param in cusWhereQueryParams)
+                {
+                    paramList.Add(param);
+                }
+            }
+            
             this._cormTable.SqlLog(sql);
             if (transaction != null)
             {
@@ -314,50 +328,5 @@ namespace CORM
             return "";
         }
         
-        /*
-         * 得到 Like 语句部分
-         */
-        private static string GetWhereLikeQuery(List<LikeQueryStruct> list)
-        {
-            if (list == null){
-                return "";
-            }
-            var resWhereQuery = new StringBuilder("");
-            
-            for (int i = 0; i < list.Count; i++)
-            {
-                
-                resWhereQuery.Append(list[i].column);
-                resWhereQuery.Append(" LIKE @WHERE_LIKE_PARAM_");
-                resWhereQuery.Append(i);
-                if (i != list.Count - 1)
-                {
-                    resWhereQuery.Append(" AND ");
-                }
-            }
-            return resWhereQuery.ToString();
-        }
-        
-        /*
-         * 得到 Like 预编译语句的 SQLParamter
-         */
-        private static List<SqlParameter> GetWhereLikeParam(List<LikeQueryStruct> list)
-        {
-            if (list == null){
-                return null;
-            }
-            var resWhereQuery = new List<SqlParameter>();
-            for (int i = 0; i < list.Count; i++)
-            {
-                resWhereQuery.Add(new SqlParameter("@WHERE_LIKE_PARAM_"+i, "%" + list[i].query + "%"));
-            }
-            return resWhereQuery;
-        }
-        
-        public class LikeQueryStruct
-        {
-            public string column { get; set; }
-            public string query { get; set; }
-        }
     }
 }

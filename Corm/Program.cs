@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using CORM.utils;
 using CORM.attrs;
 
@@ -16,7 +17,7 @@ namespace CORM
         [Column(Name = "studentAge_", DbType = SqlDbType.Int)]
         public int? studentAge { get; set; }
         [Column(Name = "studentSex_", DbType = SqlDbType.VarChar, Size = 2)]
-        public int? studentSex { get; set; }
+        public string studentSex { get; set; }
     }
     
     internal class Program
@@ -89,10 +90,18 @@ namespace CORM
             // SELECT 按 where 条件查询
             var st = new Student();
             st.studentAge = 10;
-            list = studentTable.Find().Where(st).Commit();
+            list = studentTable.Find().Where(st).Commit();*/
+            // 自定义 Where 查询
+            //SELECT * FROM Student WHERE studentName_ like '%me%' and studentAge_ > @StudentAge  ;
+            list = studentTable.Find().WhereQuery("studentName_ like '%me%' and studentAge_ > @StudentAge", new[]
+            {
+                new SqlParameter("@StudentAge", 5),
+            }).Commit();
             Console.WriteLine(list.Count);
             
             
+            
+            /*
             // SELECT 查询特定的属性
             list = studentTable.Find().Attributes(new[] {"studentName_"}).Commit();
             Console.WriteLine(list.Count);
@@ -100,17 +109,7 @@ namespace CORM
             // SELECT 只查询前 n 条
             list = studentTable.Find().Top(1).Commit();
             Console.WriteLine(list.Count);
-
-            // SELECT Like 查询
-            // 将会得到 
-            //         studentName_ LIKE '%test%' AND studentAge_ LIKE '%2%'
-            //
-            list = studentTable.Find()
-                .WhereLike("studentName_", "test")
-                .WhereLike("studentAge_", "2")
-                .Commit();
-            Console.WriteLine(list.Count);
-            
+        
             // 直接返回 SqlDataReader
             // 并使用 SqlDataReaderParse 工具解析 reader
             var sqlTemp1 = @"SELECT 
@@ -168,13 +167,13 @@ namespace CORM
             })
             .Commit();
             */
-            
+
             /*
             // 判断是否存在特定条件的学生
             bool hasThisStudent = studentTable.Find().Where(new Student() {studentName = "inset2"}).CommitForHas();
             Console.WriteLine(hasThisStudent);
             */
-            
+
             /*
             // Delete 删除操作
             // 删除该表全部数据
